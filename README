@@ -1,0 +1,7 @@
+This is a rapidly developing benchmark suite for perl 5 and perl 6
+solutions to programming problems from http://projecteuler.net/.
+
+File in each directory are named according to:
+
+<3-digit project euler number>.<2-digit implementation number>.pl
+
