@@ -30,7 +30,6 @@ my $number_string = join '',qw/
 my $max = 0;
 for 0..995 -> $x {
     my $product = [*] $number_string.substr($x, 5).comb;
-
     $max = $product if $product > $max;
 }
 
