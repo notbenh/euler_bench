@@ -13,7 +13,7 @@ say $i;
 sub is_prime( $n) {
 
     my $x = 3;
-    while ( $x < sqrt $n ) {
+    while ( $x <= sqrt $n ) {
         return 0 unless $n % $x;
         $x += 2;
     }
