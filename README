@@ -1,7 +1,12 @@
-This is a rapidly developing benchmark suite for perl 5 and perl 6
-solutions to programming problems from http://projecteuler.net/.
+Euler Benchmark Suite
 
-File in each directory are named according to:
+The Euler Benchmark Suite aims at comparing language speeds for the Euler
+Project Problems at http://projecteuler.net/.
 
-<3-digit project euler number>.<2-digit implementation number>.pl
+This mostly consists of perl 5 and perl 6 solutions, but all languages are
+welcome.
+
+Files in each directory are named according to:
+
+<language>/<3-digit project euler number>/<2-digit implementation number>.ext
 
