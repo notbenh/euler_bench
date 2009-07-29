@@ -8,7 +8,7 @@ Calculate the 10001st prime number
 
 =head1 SYNOPSIS
 
-    % time ./parrot examples/benchmarks/primes2.pir
+    % time parrot ./parrot/007/01.pir
 
 =head1 DESCRIPTION
 
