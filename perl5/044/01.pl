@@ -14,46 +14,33 @@ use strict; use warnings;
 # 
 # Find the smallest pair of pentagonal numbers for which their sum and difference is pentagonal; what is their difference?
 
-
+my $min_diff;
 my $pents;
-for(1..10000){
-    my $pent = pentagonal($_);
-    $pents->{ $pent } = $_;
 
-    check_pents() unless $_ % 1000;
+$pents->{ pentagonal($_) } = $_ for(1..5000);
 
-    #print pentagonal($_)."\n";
-}
+check_pents();
 
 sub check_pents {
-    print STDERR "checking...";
     foreach my $p1 ( sort { $a <=> $b } keys %$pents ){
         foreach my $p2 ( sort { $a <=> $b } keys %$pents ){
-            #print "checking $p1 + $p2\n";
-            #print "found $p1 & $p2!\n"
-            #     ."sum:        @{[ $p1 + $p2 ]}\n"
-            #    if $pents->{ $p1 + $p2 }
-            #;
-            #print "found $p1 & $p2!\n"
-            #     ."difference: @{[ abs( $p1 - $p2 ) ]}\n"
-            #    if $pents->{ abs( $p1 - $p2 ) }
-            #;
-            print "\nfound $p1 & $p2!                    (n1 = $pents->{$p1} & n2 = $pents->{$p2})\n"
-                 ."sum:        @{[ $p1 + $p2 ]}        (n = $pents->{$p1 + $p2})\n"
-                 ."difference: @{[ abs( $p1 - $p2 ) ]} (n = $pents->{abs($p1-$p2)})\n"
-                if (    $pents->{ $p1 + $p2 }
-                    and $pents->{ abs( $p1 - $p2 ) }
-                )
-            ;
+            if ( $pents->{ $p1 + $p2 } and $pents->{ abs( $p1 - $p2 ) }){
+                #print "\nfound $p1 & $p2!                    (n1 = $pents->{$p1} & n2 = $pents->{$p2})\n"
+                #     ."sum:        @{[ $p1 + $p2 ]}        (n = $pents->{$p1 + $p2})\n"
+                #     ."difference: @{[ abs( $p1 - $p2 ) ]} (n = $pents->{abs($p1-$p2)})\n"
+                #;
+                printf "Answer: %d\n", abs( $p1 - $p2 );
+                exit 0;
+            }
         }
     }
-    print STDERR "done.\n";
 }
+
 
 
 sub pentagonal {
     my $n = shift;
 
-    return ( $_ * ( ( 3 * $_ ) - 1 ) ) / 2;
+    return ( $n * ( ( 3 * $n ) - 1 ) ) / 2;
 }
 
