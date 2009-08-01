@@ -3,7 +3,7 @@ Euler Benchmark Suite
 The Euler Benchmark Suite aims at comparing language speeds for the Euler
 Project Problems at http://projecteuler.net/.
 
-This mostly consists of perl 5 and perl 6 solutions, but all languages are
+This currently consists of Perl 5, Rakudo Perl 6 and Parrot solutions, but all languages are
 welcome.
 
 Files in each directory are named according to:
