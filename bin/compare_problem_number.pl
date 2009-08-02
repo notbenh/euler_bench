@@ -14,13 +14,13 @@ my $parrot = $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot});
 
 my ($euler_problem,$count) = @ARGV;
 $euler_problem ||= '001';
-$count ||= 100;
+$count ||= 1000;
 
 my @codez;
 for my $language (@languages) {
      push @codez, grep { $_ } glob(catdir($language,$euler_problem,'*'));
 }
-#die Dumper [ @codez ];
+#warn Dumper [ @codez ];
 
 my %bench_data = map {
     my $file = $_;
