@@ -8,7 +8,12 @@ use Benchmark qw/:all/;
 use File::Spec::Functions;
 
 # Uses the $PARROT env variable or defaults to where I put it :)
-my $parrot = $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot});
+
+my %interp = (
+    parrot => $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot}),
+    perl5  => 'perl5.10',
+    perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
+);
 
 my ($profile_lang,$euler_problem,$count) = @ARGV;
 $profile_lang ||= 'parrot';
@@ -23,10 +28,10 @@ my @codez = glob catdir($code_dir,'*');
 my %bench_data =
     map {
         my $file = $_;
-        $file => sub { system("$parrot $file &>/dev/null") }
+        $file => sub { system("$interp{$profile_lang} $file &>/dev/null") }
     } @codez;
 
 #die Dumper [ %bench_data ];
-say "Benchmarking $profile_lang on EP#$euler_problem with $count iterations";
+say "Benchmarking $interp{$profile_lang} on EP#$euler_problem with $count iterations";
 cmpthese($count, \%bench_data);
 
