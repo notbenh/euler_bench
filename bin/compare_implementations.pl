@@ -7,11 +7,10 @@ use Data::Dumper;
 use Benchmark qw/:all/;
 use File::Spec::Functions;
 
-# Uses the $PARROT env variable or defaults to where I put it :)
-
 my %interp = (
     parrot => $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot}),
     perl5  => 'perl5.10',
+    # we should change perl6 to rakudo
     perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
 );
 
