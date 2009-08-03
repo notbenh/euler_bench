@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+use App::Rad;
+use Data::Dumper;
+sub D (@) {warn Dumper(@_)}
+
+sub setup {
+   my $c = shift;
+   D {ARGV => $c->argv}; 
+   D {ARGV => \@ARGV}; 
+}; 
+
+sub implementation {
+   my $c = shift;
+}; 
+
+sub problem {
+   my $c = shift;
+}; 
+
+
+
+
+App::Rad->run();
