@@ -1,6 +1,10 @@
 my $max = 100;
 say [-] (map {$_*$_}, [+] (1..$max)), ([+] map {$_*$_}, (1..$max));
 
+# oddly this next line does not work, you end up with -338349 (ie - last element in list)
+#say (map {$_*$_}, [+] (1..$max)) - ([+] map {$_*$_}, (1..$max));
+
+
 =begin
 The sum of the squares of the first ten natural numbers is,
 1^(2) + 2^(2) + ... + 10^(2) = 385
