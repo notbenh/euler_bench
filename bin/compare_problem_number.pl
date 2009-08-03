@@ -9,9 +9,9 @@ use File::Spec::Functions;
 
 my %interp = (
     parrot => $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot}),
-    perl5  => 'perl5.10',
+    perl5  => $ENV{PERL5} || 'perl5.10',
     # we should change perl6 to rakudo
-    perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
+    perl6  => $ENV{RAKUDO} || $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
 );
 my @languages = qw/ parrot perl5 perl6 /;
 
