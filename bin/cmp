@@ -1,23 +1,91 @@
 #!/usr/bin/perl
+use 5.010;
 use App::Rad;
 use Data::Dumper;
+use Scalar::Util qw{looks_like_number};
+use Benchmark qw/:all/;
+use File::Find;
+use File::Fu;
+use File::Spec::Functions;
+
 sub D (@) {warn Dumper(@_)}
 
 sub setup {
    my $c = shift;
-   D {ARGV => $c->argv}; 
-   D {ARGV => \@ARGV}; 
+
+   $c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
+
+
+D {HERE => File::Fu->file(__FILE__)->dir->absolute->slice(0,-2)};
+   # this is overkill but I didnt' want to run `ls` thru regex to get it... groan
+   my @dirs ;
+   find(sub{push @dirs, $_ if -d && $File::Find::dir !~ m/[.]git/ && !m/^[.]/ && $_ ne 'bin'}, q{..});
+   
+   # sort out the dirs based on if it's numeric or not, build out the 'acceptable' imp and problem values
+   foreach ( @dirs ) {
+      my $what = (looks_like_number($_))
+               ? 'problem'
+               : 'implementation' ;
+      $c->stash->{$what}->{$_} = 1 if length($_) > 0;
+   }
+   
+   # stash off the how to run each language by letting us know where each interepeter is
+   $c->stash->{perl5}  = $ENV{PERL5}  || 'perl5.10';
+   $c->stash->{parrot} = $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot});
+   $c->stash->{perl6}  = $ENV{RAKUDO} || $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6});
+   $c->stash->{count}  = $ENV{COUNT}  || 100;
+   
+   # now lets parse out what was passed to us via ARGV
+   foreach (@ARGV) {
+      if ($c->stash->{implementation}->{$_}) {
+         push @{$c->options->{implementation}}, $_;
+      }
+      else {
+         my $p = sprintf( q{%03d}, $_);
+         push @{$c->options->{problem}}, $p 
+            if $c->stash->{problem}->{$p};
+      }
+   }
 }; 
 
-sub implementation {
+
+sub _build_cmd {
    my $c = shift;
-}; 
+   my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
+#D {BC => [$imp,$prob]};
+   my %out = map{ my $i = $_;
+                  map { my $f = sprintf q{},'';
+                      } @$prob
+                } @$imp;
+   
+}
 
-sub problem {
+sub default { report(@_) }; 
+sub report :Help(Output a report)  {
    my $c = shift;
+   my $count  = $c->options->{count}   || $c->stash->{count};
+
+   D _build_cmd($c);
+
+=pod
+   my %bench_data = map {
+       my $file = $_;
+       my $lang;
+       if ($file =~ m/^([a-z0-9]+)/i ) {
+           $lang = $1;
+       }
+       die "Unknown language $lang" unless $interp{$lang};
+
+       $file => sub { system("$interp{$lang} $file &>/dev/null") },
+   } @codez;
+
+   #warn Dumper [ %bench_data ];
+   say "Benchmarking EP#$euler_problem with $count iterations";
+   cmpthese($count, \%bench_data);
+=cut
+
+
 }; 
-
-
 
 
 App::Rad->run();
