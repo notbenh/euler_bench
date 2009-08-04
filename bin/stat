@@ -89,10 +89,10 @@ sub overview :Help(grand overview) {
    undef; #stops the count of the map from being returned
 }
 
-sub report :Help(How we doin'? restrict by asking for something, --done will limit to only problems solved)  {
+sub report :Help(How we doin'? restrict by asking for something, --all will include all possible problems)  {
    my $c = shift;
-   my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
-   my $fmt = join( ' ', q{%4s}, map {sprintf qq{%%%ds}, length($_) } @$imp )."\n";
+   my ($imp,$prob) = _build_data($c);
+   my $fmt = _FL(4,@$imp);
    printf $fmt, ' ', @$imp; #header
    map { my $p = $_; #keep the problem number
          printf $fmt, $p, map { $c->stash->{solved}->{$_}->{$p} || '-' } @$imp
