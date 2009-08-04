@@ -41,17 +41,15 @@ my %number_lengths = (
     90 => 6
 );
 
-sub NumberLength(%number_lengths, $number)
-{
-    return %number_lengths{$number} if ($number < 20);
-    my $ones = $number % 10;
-    return %number_lengths{$number - $ones} + %number_lengths{$ones};
-}
-
 my $one_to_ninety_nine = 0;
-for 1..99 -> $number
+for 1..19 -> $number
 {
-    $one_to_ninety_nine += NumberLength(%number_lengths, $number);
+    $one_to_ninety_nine += %number_lengths{$number};
+}
+for 20..99 -> $number
+{
+    my $ones = $number % 10;
+    $one_to_ninety_nine += %number_lengths{$number - $ones} + %number_lengths{$ones};
 }
 
 my $letter = 10 * $one_to_ninety_nine;
