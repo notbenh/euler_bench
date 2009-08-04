@@ -9,10 +9,6 @@ use v6;
 #
 # Notes say something about "and" in numbers, but I have ignored this as I
 # have no idea how to count this.
-#
-# Obvious optimizations: Just store the number of letters in each word rather
-# than the actual string.  That's harder to test, but would be vastly more
-# efficient.
 
 my %number_lengths = (
     1 => 3,
