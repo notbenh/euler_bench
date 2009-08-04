@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-my $sum = 0;
 
 =pod
 
@@ -12,7 +11,7 @@ Find the sum of all the multiples of 3 or 5 below 1000.
 
 =cut
 
-map { $sum += $_ if($_ % 3 == 0 || $_ % 5 == 0) (1..999);
-
+my $sum = 0;
+map { $sum += $_ if($_ % 3 == 0 || $_ % 5 == 0)} (1..999);
 print "$sum\n";
 
