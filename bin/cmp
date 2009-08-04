@@ -4,36 +4,37 @@ use App::Rad;
 use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
 use Benchmark qw/:all/;
-use File::Find;
 use File::Fu;
 use File::Spec::Functions;
 
-sub D (@) {warn Dumper(@_)}
+sub D (@) {print Dumper(@_)}
 
 sub setup {
    my $c = shift;
 
+   # what commands to learn, ignoring private and debugging
    $c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
 
+   # whare are we in the dir tree?
+   my $root_path = File::Fu->THIS_FILE->absolute->dirname->dirname->stringify;
+   $c->stash->{root_path} = $root_path;
 
-D {HERE => File::Fu->file(__FILE__)->dir->absolute->slice(0,-2)};
-   # this is overkill but I didnt' want to run `ls` thru regex to get it... groan
-   my @dirs ;
-   find(sub{push @dirs, $_ if -d && $File::Find::dir !~ m/[.]git/ && !m/^[.]/ && $_ ne 'bin'}, q{..});
-   
-   # sort out the dirs based on if it's numeric or not, build out the 'acceptable' imp and problem values
-   foreach ( @dirs ) {
-      my $what = (looks_like_number($_))
-               ? 'problem'
-               : 'implementation' ;
-      $c->stash->{$what}->{$_} = 1 if length($_) > 0;
-   }
-   
+   # build out a list of all languages and problems
+   map   {my ($lang,$prob) = split /\//, $_; 
+          $c->stash->{implementation}->{$lang} = 1;
+          $c->stash->{problem}->{$prob} = 1; 
+   } grep{m{/.*/}
+   } map {$_ = $_->stringify; 
+          s/$root_path//; 
+          $_
+   } File::Fu->THIS_FILE->absolute->dirname->dirname->find(sub{!m/(?:bin|[.]git)/ && -d}) ;
+
    # stash off the how to run each language by letting us know where each interepeter is
    $c->stash->{perl5}  = $ENV{PERL5}  || 'perl5.10';
    $c->stash->{parrot} = $ENV{PARROT} || catfile( $ENV{HOME},qw{git parrot parrot});
    $c->stash->{perl6}  = $ENV{RAKUDO} || $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6});
-   $c->stash->{count}  = $ENV{COUNT}  || 100;
+   #$c->stash->{count}  = $ENV{COUNT}  || 100;
+   $c->stash->{count}  = 100;
    
    # now lets parse out what was passed to us via ARGV
    foreach (@ARGV) {
@@ -51,11 +52,18 @@ D {HERE => File::Fu->file(__FILE__)->dir->absolute->slice(0,-2)};
 
 sub _build_cmd {
    my $c = shift;
+   # standardize where to look for things based on if they exist
    my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
-#D {BC => [$imp,$prob]};
-   my %out = map{ my $i = $_;
-                  map { my $f = sprintf q{},'';
-                      } @$prob
+   my %out = map{ my $lang = $_;
+                  map  { my $runner = sprintf q{%s %s &>/dev/null}, $c->stash->{$lang}, $_;
+                         D $runner;
+                         $_ => sub{system($runner)}                  #5:file path => sub to run
+                  }map { $dir = $_; 
+                         map{join '/', $dir, $_ }                    #4:make a full path for each file
+                         File::Fu->dir($dir)->absolute->contents     #3:find all the files in these dirs
+                  }grep{ -d                                          #2:then trim down to the ones that exists
+		  }map { $c->stash->{root_path}. join '/', $lang, $_ #1:what dirs were asked for (guess)
+                       } @$prob
                 } @$imp;
    
 }
@@ -63,28 +71,15 @@ sub _build_cmd {
 sub default { report(@_) }; 
 sub report :Help(Output a report)  {
    my $c = shift;
-   my $count  = $c->options->{count}   || $c->stash->{count};
-
-   D _build_cmd($c);
-
-=pod
-   my %bench_data = map {
-       my $file = $_;
-       my $lang;
-       if ($file =~ m/^([a-z0-9]+)/i ) {
-           $lang = $1;
-       }
-       die "Unknown language $lang" unless $interp{$lang};
-
-       $file => sub { system("$interp{$lang} $file &>/dev/null") },
-   } @codez;
-
-   #warn Dumper [ %bench_data ];
-   say "Benchmarking EP#$euler_problem with $count iterations";
-   cmpthese($count, \%bench_data);
-=cut
-
-
+   my $count  = $c->options->{count} || $c->stash->{count};
+D {
+OPTS => $c->options,
+OPT  => $c->options->{count},
+STAH => $c->stash->{count},
+PICK => $count,
+};
+   say qq{Benchmarking $count iterations};
+   cmpthese($count, {_build_cmd($c)});
 }; 
 
 
