@@ -3,6 +3,8 @@ use 5.010;
 use App::Rad;
 use Data::Dumper;
 use File::Fu;
+use Scalar::Util qw{looks_like_number};
+use List::Util qw{sum max};
 
 sub D (@) {print Dumper(@_)}
 
@@ -12,7 +14,6 @@ sub setup {
    # what commands to learn, ignoring private and debugging
    $c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
    $c->stash->{max_problem} = 252; # http://projecteuler.net/index.php?section=problems&page=6
-   map{ $c->stash->{problem}->{sprintf q{%03d},$_} = 1; } 1..$c->stash->{max_problem};
 
    # whare are we in the dir tree?
    my $root_path = File::Fu->THIS_FILE->absolute->dirname->dirname->stringify;
@@ -23,6 +24,7 @@ sub setup {
    #                    what problems have been solved in what languages (how many instances)
    map   {my ($lang,$prob) = split /\//, $_; 
           $c->stash->{implementation}->{$lang} = 1;
+          $c->stash->{problem}->{$prob} = 1;
           $c->stash->{solved}->{$lang}->{$prob} = scalar(
                                                    grep{m/^\d+[_.]/} 
                                                    File::Fu->dir( $c->stash->{root_path}."/$_")->absolute->contents
@@ -46,16 +48,54 @@ sub setup {
    }
 }; 
 
+sub _build_data {
+   my $c = shift;
+   my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
+   $prob = [sort map{sprintf q{%03d},$_} 1..$c->stash->{max_problem}]
+      if $c->options->{all};
+   return ($imp,$prob);
+}
 
-sub default { report(@_) }; 
-#sub report :Help(Output a report of all problems done on what languages. --done will restrict to just the problems with solutions.)  {
+
+# Quickie that will build printf strings for us
+sub _FL { join( ' ', map{ my $l = (looks_like_number($_)) ? $_ : length($_);
+                         sprintf qq{%%%ds}, $l;
+                       } @_ 
+              )."\n";
+        }
+
+sub default { overview(@_) }; 
+sub overview :Help(grand overview) {
+   my $c = shift;
+   my ($imp,$prob) = _build_data($c);
+   my $rows = { 'done in' => sub{my $d = shift;
+                                 sprintf '%d/%d', scalar(map{values %$_}values %$d), scalar(@$prob);
+                                },
+                '+1 solve'=> sub{my $d = shift;
+                                 my ($l) = keys %$d;
+                                 scalar( grep{$_>1}
+                                         map{values %$_}
+                                         values %$d
+                                       );
+                                },
+              };
+   my $fmt = _FL(max(map{length}keys %$rows),@$imp);
+   printf $fmt, '', @$imp;
+   map { my $rowname = $_;
+         printf $fmt, $rowname, 
+                      map{ $rows->{$rowname}->({$_ => $c->stash->{solved}->{$_}})
+                         } @$imp;
+       } sort keys %$rows;
+   undef; #stops the count of the map from being returned
+}
+
 sub report :Help(How we doin'? restrict by asking for something, --done will limit to only problems solved)  {
    my $c = shift;
    my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
    my $fmt = join( ' ', q{%4s}, map {sprintf qq{%%%ds}, length($_) } @$imp )."\n";
    printf $fmt, ' ', @$imp; #header
    map { my $p = $_; #keep the problem number
-         printf $fmt, $p, map { $c->stash->{solved}->{$_}->{$p} || 0 } @$imp
+         printf $fmt, $p, map { $c->stash->{solved}->{$_}->{$p} || '-' } @$imp
            unless $c->options->{done} && !grep{defined && $_>0}map{$c->stash->{solved}->{$_}->{$p}} @$imp;
    } sort @$prob;
    undef; #stops the count of the map from being returned
