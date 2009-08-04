@@ -56,8 +56,9 @@ sub _build_cmd {
    my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
    my %out = map{ my $lang = $_;
                   map  { my $runner = sprintf q{%s %s &>/dev/null}, $c->stash->{$lang}, $_;
-                         D $runner;
-                         $_ => sub{system($runner)}                  #5:file path => sub to run
+                         #D $runner;
+                         my ($label) = reverse split /$lang/, $_;
+                         "$lang$label" => sub{system($runner)}                  #5:file path => sub to run
                   }map { $dir = $_; 
                          map{join '/', $dir, $_ }                    #4:make a full path for each file
                          File::Fu->dir($dir)->absolute->contents     #3:find all the files in these dirs
