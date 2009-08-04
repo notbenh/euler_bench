@@ -3,7 +3,7 @@ use 5.010;
 use App::Rad;
 use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
-use Benchmark qw/:all/;
+use Benchmark qw/:all :hireswallclock/;
 use File::Fu;
 use File::Spec::Functions;
 
@@ -58,7 +58,7 @@ sub _build_cmd {
                   map  { my $runner = sprintf q{%s %s &>/dev/null}, $c->stash->{$lang}, $_;
                          #D $runner;
                          my ($label) = reverse split /$lang/, $_;
-                         "$lang$label" => sub{system($runner)}                  #5:file path => sub to run
+                         "$lang$label" => sub{eval{`$runner`}}       #5:file path => sub to run (trap output)
                   }map { $dir = $_; 
                          map{join '/', $dir, $_ }                    #4:make a full path for each file
                          File::Fu->dir($dir)->absolute->contents     #3:find all the files in these dirs
@@ -73,14 +73,9 @@ sub default { report(@_) };
 sub report :Help(Output a report)  {
    my $c = shift;
    my $count  = $c->options->{count} || $c->stash->{count};
-D {
-OPTS => $c->options,
-OPT  => $c->options->{count},
-STAH => $c->stash->{count},
-PICK => $count,
-};
-   say qq{Benchmarking $count iterations};
-   cmpthese($count, {_build_cmd($c)});
+   #say qq{Benchmarking $count iterations};
+   cmpthese(timethese($count, {_build_cmd($c)}));
+   undef; #this is here so that we dont attempt to spit out the cmpthese array
 }; 
 
 
