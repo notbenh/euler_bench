@@ -58,16 +58,18 @@ sub NumberLength(@numbers, %number_lengths, $number)
     }
     my $n = $number;
     my $length = 0;
-    while ($n > 0)
+    for @numbers -> $number
     {
-        my $biggest = @numbers.grep({$_ <= $n}).max;
-        $length += %number_lengths{$biggest};
-        $n -= $biggest;
+        if ($number <= $n)
+        {
+            $length += %number_lengths{$number};
+            $n -= $number;
+        }
     }
     return $length;   
 }
 
-my @numbers = %number_lengths.keys.map({+$_});
+my @numbers = %number_lengths.keys.map({+$_}).sort.reverse;
 my $letter = 0;
 for 1..1000 -> $number
 {
