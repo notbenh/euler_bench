@@ -52,7 +52,7 @@ sub _build_data {
    my $c = shift;
    my ($imp,$prob) = map{ $c->options->{$_} || [keys %{$c->stash->{$_}}] } qw{implementation problem};
    $prob = [sort map{sprintf q{%03d},$_} 1..$c->stash->{max_problem}]
-      if $c->options->{all};
+      if defined $c->options->{all};
    return ($imp,$prob);
 }
 
