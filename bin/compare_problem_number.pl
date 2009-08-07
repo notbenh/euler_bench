@@ -1,6 +1,6 @@
-#!/usr/bin/env perl5.10
+#!/usr/bin/env perl
 # Hello. I compare units of code across languages for a given problem number
-use 5.010;
+#use 5.010;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -37,6 +37,6 @@ my %bench_data = map {
 } @codez;
 
 #warn Dumper [ %bench_data ];
-say "Benchmarking EP#$euler_problem with $count iterations";
+print "Benchmarking EP#$euler_problem with $count iterations\n";
 cmpthese($count, \%bench_data);
 
