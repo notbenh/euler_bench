@@ -1,12 +1,14 @@
 use v6;
 
 # based on code by PerlJam 
+# btilly points out that $n must be divisible by 9, which leads to a further factor
+# of three speedup. 
 
-my $pass_start = 5;     # start at the first number divisible by three after this one
+my $pass_start = 5;     # start at the first number divisible by nine after this one
 my $pass_end = 17;      # 17 * 6 has an additional digit
 loop
 {
-    loop (my $n = $pass_start + 1; $n < $pass_end; $n += 3)
+    loop (my $n = $pass_start + 4; $n < $pass_end; $n += 9)
     {
         my $digits = (2*$n).comb.sort;
         next unless ($digits ~~ /0|5/);
