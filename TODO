@@ -1,4 +1,3 @@
-work out a :
+All TODO's are now managed via github:
+http://github.com/notbenh/euler_bench/issues
 
-- better scheme to allow point to point relationships between solutions accross languages
-- some global benchmark controller 
