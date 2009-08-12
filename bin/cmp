@@ -14,7 +14,7 @@ sub setup {
 
    # what commands to learn, ignoring private and debugging
    #$c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
-   $c->register_commands( qw{report} ); 
+   $c->register_commands( qw{report data} ); 
 
    # whare are we in the dir tree?
    my $root_path = File::Fu->THIS_FILE->absolute->dirname->dirname->stringify;
@@ -86,6 +86,15 @@ sub report :Help(Output a report)  {
    cmpthese(timethese($count, {_build_cmd($c)}));
    undef; #this is here so that we dont attempt to spit out the cmpthese array
 }; 
+
+sub data :Help(Output just the data collected)  {
+   my $c = shift;
+   my $count  = $c->options->{count} || $c->stash->{count};
+   #say qq{Benchmarking $count iterations};
+   cmpthese(timethese($count, {_build_cmd($c)}));
+   undef; #this is here so that we dont attempt to spit out the cmpthese array
+}; 
+
 
 
 App::Rad->run();
