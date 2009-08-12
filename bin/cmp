@@ -47,6 +47,8 @@ sub setup {
             if $c->stash->{problem}->{$p};
       }
    }
+
+
 }; 
 
 
@@ -69,14 +71,66 @@ sub _build_cmd {
    
 }
 
-sub default { report(@_) }; 
-sub report :Help(Output a report)  {
+sub default { display(@_) }; 
+
+sub display {
    my $c = shift;
-   my $count  = $c->options->{count} || $c->stash->{count};
-   #say qq{Benchmarking $count iterations};
-   cmpthese(timethese($count, {_build_cmd($c)}));
-   undef; #this is here so that we dont attempt to spit out the cmpthese array
-}; 
+   # also lets standardize the display options
+   D {PREDISPLAY => $c->options->{display} };
+   if (!defined $c->options->{display} ) {
+      $c->options->{display} = ( $c->options->{report} ) ? 'report'
+                             : ( $c->options->{data}   ) ? 'data'
+                             :                             'report';
+   }
+   D {POSTDISPLAY => $c->options->{display} };
+   
+   if (main->can($c->options->{display}) ) {
+      my $display = $c->options->{display};
+      my @data = &$display($c);
+      D {DATA => \@data};
+   }
+   else {
+      printf qq{FAILURE: '%s' is not a valid display type.\n\n}, $c->options->{display};
+   }
+}
+
+sub report :Help(Output a text report)  {
+   my $c = shift;
+   cmpthese(timethese( _count($c), {_build_cmd($c)}));
+   undef; # cmpthese does it's own output and returns an array of rows, this just hides the rows that would be reported
+}
+
+sub data :Help(Output only data gathered) {
+   my $c = shift;
+   cmpthese(timethese( _count($c), {_build_cmd($c)}), 'none');
+}
+
+sub _count {
+   my $c = shift;
+   $c->options->{count} || $c->stash->{count};
+}
+
+
+
+
+
+
+
+sub post_process {
+   use JSON;
+   my $c = shift;
+
+   my $json = new JSON;
+      $json->allow_blessed(1);
+
+   if ( $c->output() ) {
+      printf qq{\n%s\n}, 
+             (ref($c->output() )) ? $json->encode( $c->output() )
+                                  : $c->output() ;
+   }
+}
+
+
 
 
 App::Rad->run();
