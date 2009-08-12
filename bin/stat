@@ -12,7 +12,8 @@ sub setup {
    my $c = shift;
 
    # what commands to learn, ignoring private and debugging
-   $c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
+   #$c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
+   $c->register_commands( qw{overview report} );
    $c->stash->{max_problem} = 252; # http://projecteuler.net/index.php?section=problems&page=6
 
    # whare are we in the dir tree?
@@ -46,6 +47,7 @@ sub setup {
             if $c->stash->{problem}->{$p};
       }
    }
+
 }; 
 
 sub _build_data {
@@ -64,7 +66,16 @@ sub _FL { join( ' ', map{ my $l = (looks_like_number($_)) ? $_ : length($_);
               )."\n";
         }
 
-sub default { overview(@_) }; 
+sub default { 
+   my $c = shift;
+
+   # allow for --help 
+   if( $c->options->{HELP} || $c->options->{help} ) {
+      return $c->execute('help');
+   }
+   overview($c,@_);
+} 
+
 sub overview :Help(grand overview) {
    my $c = shift;
    my ($imp,$prob) = _build_data($c);
