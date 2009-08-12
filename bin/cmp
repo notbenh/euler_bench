@@ -91,10 +91,19 @@ sub data :Help(Output just the data collected)  {
    my $c = shift;
    my $count  = $c->options->{count} || $c->stash->{count};
    #say qq{Benchmarking $count iterations};
-   cmpthese(timethese($count, {_build_cmd($c)}));
-   undef; #this is here so that we dont attempt to spit out the cmpthese array
+   timethese($count, {_build_cmd($c)}, 'none');
 }; 
 
+sub post_process {
+   use JSON qw{-convert_blessed_universally};
+   my $c = shift;
+   my $json = new JSON;
+   $json->allow_blessed(1);
+   $json->convert_blessed(1);
 
+   printf qq{\n%s\n},
+          (ref($c->output)) ? $json->encode($c->output)
+                            : $c->output ;
+}
 
 App::Rad->run();
