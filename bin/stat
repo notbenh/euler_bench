@@ -34,7 +34,7 @@ sub setup {
    } map {$_ = $_->stringify; 
           s/$root_path//; 
           $_
-   } File::Fu->THIS_FILE->absolute->dirname->dirname->find(sub{!m/(?:bin|[.]git)/ && -d}) ;
+   } File::Fu->THIS_FILE->absolute->dirname->dirname->find(sub{!m/(?:bin|inc|[.]git)/ && -d}) ;
 
    # now lets parse out what was passed to us via ARGV
    foreach (@ARGV) {
