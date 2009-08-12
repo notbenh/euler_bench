@@ -13,7 +13,8 @@ sub setup {
    my $c = shift;
 
    # what commands to learn, ignoring private and debugging
-   $c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
+   #$c->register_commands( { -ignore_regexp => '^(_.*|D|Dumper)$' } );
+   $c->register_commands( qw{report} ); 
 
    # whare are we in the dir tree?
    my $root_path = File::Fu->THIS_FILE->absolute->dirname->dirname->stringify;
@@ -47,8 +48,6 @@ sub setup {
             if $c->stash->{problem}->{$p};
       }
    }
-
-
 }; 
 
 
@@ -71,9 +70,16 @@ sub _build_cmd {
    
 }
 
-sub default { display(@_) }; 
+sub default { 
+   my $c = shift;
+   # allow for --help 
+   if( $c->options->{HELP} || $c->options->{help} ) {
+      return $c->execute('help');
+   }
+   report($c,@_) 
+} 
 
-sub display {
+sub report :Help(Output a report)  {
    my $c = shift;
    # also lets standardize the display options
    D {PREDISPLAY => $c->options->{display} };
