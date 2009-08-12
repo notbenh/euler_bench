@@ -5,6 +5,7 @@ use 5.008001;
 
 name 'EulerBench';
 perl_version '5.010000';
+version '0.1.0';
 #all_from 'lib/Moose.pm';
 license 'perl';
 
