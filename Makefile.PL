@@ -23,6 +23,8 @@ requires
     'File::Spec::Functions' => '0';
 requires
     'Benchmark'             => '0';
+requires
+    'JSON'                  => '0';
 
 
 auto_install;
