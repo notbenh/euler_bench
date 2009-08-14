@@ -13,6 +13,7 @@ sub D (@){print Dumper(@_)}; #so I'm lazy
 # what are we to be doing?
 my $default_cmd = 'report';
 my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
+my $count = 100;
 
 #---------------------------------------------------------------------------
 #  What languages, problems, and solutions are available
@@ -55,19 +56,23 @@ map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested; #rev
 # !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
 
 # build out the 'command' to run pulling the right interp and files
-my $runners = [ map{ my $lang=$_; 
-                     map { my $interp = $_;
-                           map{ join ' ', $interp, $_}                  #5 join the right interep with the right file path
-                           map{ sort values %{$solutions->{$lang}->{$_}}#4 get the right file paths for the problem
-                              } @{$requested->{prob}}                   #3 for every problem that was requested
-                         } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
-                   } @{$requested->{lang}}                              #1 for every language requested
-              ];
+my $runs = {};
+map{ my $lang=$_; 
+     map { my $interp = $_;
+           map{ my $prob = $_;
+                map{ push @{$runs->{$lang}->{$prob}->{$_}}, join ' ', $interp, $_;
+                   } sort values %{$solutions->{$lang}->{$prob}}
+                                                        #4 get the right file paths for the problem
+              } @{$requested->{prob}}                   #3 for every problem that was requested
+         } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
+   } @{$requested->{lang}};                             #1 for every language requested
 
 
+D $runs;
+D $requested;
 
 
-
+sub run_command {}
 
 
 
