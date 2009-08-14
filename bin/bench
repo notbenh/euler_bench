@@ -7,6 +7,7 @@ use File::Basename;
 use File::Find;
 use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
+use YAML qw{LoadFile};
 sub D (@){print Dumper(@_)}; #so I'm lazy 
 
 # what are we to be doing?
@@ -17,6 +18,7 @@ my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
 #  What languages, problems, and solutions are available
 #---------------------------------------------------------------------------
 my $root_dir = [fileparse(abs_path(__FILE__))]->[1];
+my $config   = LoadFile($root_dir . 'config.yaml');
 my $base_dir = basename($root_dir);
 $root_dir =~ s/(.*)$base_dir.?/$1/;
 
@@ -26,7 +28,7 @@ find(sub{ my $p = $File::Find::name;
           my ($lang,$prob,$solution) = split /[\/]/, $p;
           push @{ $solutions->{$lang}->{$prob} }, $solution
             if $lang !~ m/^(?:bin|inc|[.]git)/ 
-            && defined $lang        #language should be useful
+            && defined $lang        # language should be in a useful format
             && length $lang
             && defined $solution    # we should have a solution
             && length $solution     
@@ -38,16 +40,21 @@ my $problems = { map{$_ => 1} map{keys %$_} values %$solutions};
 
 my $requested = {};
 sub mk_prob{ sprintf q{%03d}, shift }
-map{ $_ = mk_prob($_) if looks_like_number($_);
-     my $where = ($problems->{$_} ) ? 'prob'
+map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
+     $_ = $config->{alias}->{$_} || $_;         # alias the input based on the config
+     my $where = ($problems->{$_} ) ? 'prob'    
                : ($solutions->{$_}) ? 'lang'
                :                      'opt';
      push @{$requested->{$where}}, $_; 
    } @ARGV;
 
-D $requested;
 
-sub report {}
-sub data {}
-sub graph {}
+
+
+sub report {
+}
+sub data {
+}
+sub graph {
+}
 
