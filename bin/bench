@@ -30,10 +30,22 @@ find(sub{ my $p = $File::Find::name;
             && length $lang
             && defined $solution    # we should have a solution
             && length $solution     
-            && $solution =~ m/^[.]/ # hide any 'hidden' file
+            && $solution !~ m/^[.]/ # hide any 'hidden' file
             ;
         }, $root_dir);
+# a quick list of available problems, just to make the next step easy
+my $problems = { map{$_ => 1} map{keys %$_} values %$solutions};
 
+my $requested = {};
+sub mk_prob{ sprintf q{%03d}, shift }
+map{ $_ = mk_prob($_) if looks_like_number($_);
+     my $where = ($problems->{$_} ) ? 'prob'
+               : ($solutions->{$_}) ? 'lang'
+               :                      'opt';
+     push @{$requested->{$where}}, $_; 
+   } @ARGV;
+
+D $requested;
 
 sub report {}
 sub data {}
