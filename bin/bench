@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use 5.010;
+use Cwd qw{abs_path};
+use File::Basename;
+use File::Find;
+use Data::Dumper;
+use Scalar::Util qw{looks_like_number};
+sub D (@){print Dumper(@_)}; #so I'm lazy 
+
+# what are we to be doing?
+my $default_cmd = 'report';
+my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
+
+#---------------------------------------------------------------------------
+#  What languages, problems, and solutions are available
+#---------------------------------------------------------------------------
+my $root_dir = [fileparse(abs_path(__FILE__))]->[1];
+my $base_dir = basename($root_dir);
+$root_dir =~ s/(.*)$base_dir.?/$1/;
+
+my $solutions = {};
+find(sub{ my $p = $File::Find::name; 
+          $p =~ s/$root_dir//; 
+          my ($lang,$prob,$solution) = split /[\/]/, $p;
+          push @{ $solutions->{$lang}->{$prob} }, $solution
+            if $lang !~ m/^(?:bin|inc|[.]git)/ 
+            && defined $lang        #language should be useful
+            && length $lang
+            && defined $solution    # we should have a solution
+            && length $solution     
+            && $solution =~ m/^[.]/ # hide any 'hidden' file
+            ;
+        }, $root_dir);
+
+
+sub report {}
+sub data {}
+sub graph {}
+
