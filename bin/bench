@@ -17,11 +17,13 @@ my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
 #---------------------------------------------------------------------------
 #  What languages, problems, and solutions are available
 #---------------------------------------------------------------------------
+# where are we in the filesystem?
 my $root_dir = [fileparse(abs_path(__FILE__))]->[1];
-my $config   = LoadFile($root_dir . 'config.yaml');
+my $config   = LoadFile($root_dir . 'config.yaml');  # config is relative to this file
 my $base_dir = basename($root_dir);
-$root_dir =~ s/(.*)$base_dir.?/$1/;
+$root_dir =~ s/(.*)$base_dir.?/$1/; # cd ..
 
+# a list of all the languages, what problems have what solutions
 my $solutions = {};
 find(sub{ my $p = $File::Find::name; 
           $p =~ s/$root_dir//; 
@@ -35,9 +37,11 @@ find(sub{ my $p = $File::Find::name;
             && $solution !~ m/^[.]/ # hide any 'hidden' file
             ;
         }, $root_dir);
+
 # a quick list of available problems, just to make the next step easy
 my $problems = { map{$_ => 1} map{keys %$_} values %$solutions};
 
+# build out a hash of what was requiested via @ARGV
 my $requested = {};
 sub mk_prob{ sprintf q{%03d}, shift }           
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
@@ -45,17 +49,31 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
      my $where = ($problems->{$_} ) ? 'prob'    
                : ($solutions->{$_}) ? 'lang'
                :                      'opt';
-     push @{$requested->{$where}}, $_; 
+     $requested->{$where}->{$_} = 1; 
    } @ARGV;
-D {R => $requested };
-my $runners = [ map{ 1 } $requested->{lang} ];
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested;
+# !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
+
+# build out the 'command' to run pulling the right interp and files
+my $runners = [ map{ my $lang=$_; 
+                     map { my $interp = $_;
+                           map{ join ' ', $interp, $_}
+                           map{ sort values %{$solutions->{$lang}->{$_}}
+                              } @{$requested->{prob}}
+                         } @{ $config->{interp}->{$lang} }
+                   } @{$requested->{lang}} 
+              ];
+
+
+
+
+
+
+
+
 #---------------------------------------------------------------------------
 #  Run the right function for the output
 #---------------------------------------------------------------------------
-D {CMD => $cmd};
-&$cmd();
-
-
 sub report {
    D {SOL => $solutions};
 }
