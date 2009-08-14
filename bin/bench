@@ -46,22 +46,22 @@ my $requested = {};
 sub mk_prob{ sprintf q{%03d}, shift }           
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
      $_ = $config->{alias}->{$_} || $_;         # alias the input based on the config
-     my $where = ($problems->{$_} ) ? 'prob'    
+     my $where = ($problems->{$_} ) ? 'prob'    # decide what were doing by the type of data given
                : ($solutions->{$_}) ? 'lang'
                :                      'opt';
-     $requested->{$where}->{$_} = 1; 
+     $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
-map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested;
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested; #revert the unique values to an arrayref
 # !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
 
 # build out the 'command' to run pulling the right interp and files
 my $runners = [ map{ my $lang=$_; 
                      map { my $interp = $_;
-                           map{ join ' ', $interp, $_}
-                           map{ sort values %{$solutions->{$lang}->{$_}}
-                              } @{$requested->{prob}}
-                         } @{ $config->{interp}->{$lang} }
-                   } @{$requested->{lang}} 
+                           map{ join ' ', $interp, $_}                  #5 join the right interep with the right file path
+                           map{ sort values %{$solutions->{$lang}->{$_}}#4 get the right file paths for the problem
+                              } @{$requested->{prob}}                   #3 for every problem that was requested
+                         } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
+                   } @{$requested->{lang}}                              #1 for every language requested
               ];
 
 
