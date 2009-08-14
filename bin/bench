@@ -26,7 +26,7 @@ my $solutions = {};
 find(sub{ my $p = $File::Find::name; 
           $p =~ s/$root_dir//; 
           my ($lang,$prob,$solution) = split /[\/]/, $p;
-          push @{ $solutions->{$lang}->{$prob} }, $solution
+          $solutions->{$lang}->{$prob}->{$solution} = $File::Find::name
             if $lang !~ m/^(?:bin|inc|[.]git)/ 
             && defined $lang        # language should be in a useful format
             && length $lang
@@ -39,7 +39,7 @@ find(sub{ my $p = $File::Find::name;
 my $problems = { map{$_ => 1} map{keys %$_} values %$solutions};
 
 my $requested = {};
-sub mk_prob{ sprintf q{%03d}, shift }
+sub mk_prob{ sprintf q{%03d}, shift }           
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
      $_ = $config->{alias}->{$_} || $_;         # alias the input based on the config
      my $where = ($problems->{$_} ) ? 'prob'    
@@ -47,11 +47,17 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
                :                      'opt';
      push @{$requested->{$where}}, $_; 
    } @ARGV;
-
-
+D {R => $requested };
+my $runners = [ map{ 1 } $requested->{lang} ];
+#---------------------------------------------------------------------------
+#  Run the right function for the output
+#---------------------------------------------------------------------------
+D {CMD => $cmd};
+&$cmd();
 
 
 sub report {
+   D {SOL => $solutions};
 }
 sub data {
 }
