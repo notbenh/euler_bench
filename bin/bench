@@ -58,14 +58,13 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
 map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested; #revert the unique values to an arrayref
 # !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
 
-# build out the 'command' to run pulling the right interp and files
+# build out the 'command' to run pulling the right interp and files, then run them
 my $runs = {};
 map{ my $lang=$_; 
      map { my $interp = $_;
            map{ my $prob = $_;
                 map{ $runs->{$lang}->{$prob}->{$_} = run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' );
-                   } sort values %{$solutions->{$lang}->{$prob}}
-                                                        #4 get the right file paths for the problem
+                   } sort values %{$solutions->{$lang}->{$prob}} #4 now get every path
               } @{$requested->{prob}}                   #3 for every problem that was requested
          } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
    } @{$requested->{lang}};                             #1 for every language requested
@@ -99,7 +98,24 @@ sub run_command {
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
 sub report {
-  D {REPORT => $runs}; 
+   my $root_fmt = sprintf q{%%%ds %%%ds %%%ds},
+                          max( map{length} keys %$runs ),                                #language
+                          max( map{length} map{keys %$_} values %$runs ),                #prob
+                          max( map{length} map{map{keys %$_} values %$_} values %$runs );#file
+   printf qq{$root_fmt   min    max    avg   total\n}, '', '', ''; 
+   foreach my $lang (keys %$runs) {
+      foreach my $prob (keys %{$runs->{$lang}} ) {
+         foreach my $file ( keys %{$runs->{$lang}->{$prob}} ) {
+            printf qq{$root_fmt  %02.3f  %02.3f  %02.3f  %02.3f\n},
+                   $lang, $prob, $file, 
+                   map {$runs->{$lang}->{$prob}->{$file}->{$_}} qw{min max avg total};
+
+            
+         }
+      }
+   }
+   
+   
 }
 sub data {json(@_)}; #alias data -> json for now
 sub json {
