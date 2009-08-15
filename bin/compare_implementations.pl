@@ -13,6 +13,7 @@ my %interp = (
     # we should change perl6 to rakudo
     perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
     ruby   => $ENV{RUBY} || 'ruby',
+    erlang => $ENV{ERLANG} || 'escript',
 );
 
 my ($profile_lang,$euler_problem,$count) = @ARGV;
