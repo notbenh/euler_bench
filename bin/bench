@@ -16,6 +16,7 @@ sub D (@){print Dumper(@_)}; #so I'm lazy
 my $default_cmd = 'report';
 my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
 my $count = 50; #100
+my $hide_cmd_output = 1;
 
 #---------------------------------------------------------------------------
 #  What languages, problems, and solutions are available
@@ -62,7 +63,7 @@ my $runs = {};
 map{ my $lang=$_; 
      map { my $interp = $_;
            map{ my $prob = $_;
-                map{ $runs->{$lang}->{$prob}->{$_} = run_command( join ' ', $interp, $_ );
+                map{ $runs->{$lang}->{$prob}->{$_} = run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' );
                    } sort values %{$solutions->{$lang}->{$prob}}
                                                         #4 get the right file paths for the problem
               } @{$requested->{prob}}                   #3 for every problem that was requested
@@ -75,7 +76,7 @@ sub run_command {
    my $sw = Benchmark::Stopwatch::Pause->new->start->pause;
    for (1..$count) {
       $sw->unpause($_);
-      system($cmd);
+      my $rv = qx($cmd); #better trap output for use if needed
       $sw->pause;
       # if you want to check the results.... do it here.
    }
@@ -100,7 +101,7 @@ main->$cmd(); #dispatch to the 'right' output
 sub report {
   D {REPORT => $runs}; 
 }
-sub data {json(@_)};
+sub data {json(@_)}; #alias data -> json for now
 sub json {
    use JSON;
    print encode_json($runs);
