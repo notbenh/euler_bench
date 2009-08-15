@@ -7,13 +7,15 @@ use File::Basename;
 use File::Find;
 use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
+use List::Util qw{min max};
 use YAML qw{LoadFile};
+use Benchmark::Stopwatch::Pause; # it looks like theres the chance that we'll be doing some testing in the looping... this will allows us to not capture our time.
 sub D (@){print Dumper(@_)}; #so I'm lazy 
 
 # what are we to be doing?
 my $default_cmd = 'report';
 my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
-my $count = 100;
+my $count = 50; #100
 
 #---------------------------------------------------------------------------
 #  What languages, problems, and solutions are available
@@ -60,7 +62,7 @@ my $runs = {};
 map{ my $lang=$_; 
      map { my $interp = $_;
            map{ my $prob = $_;
-                map{ push @{$runs->{$lang}->{$prob}->{$_}}, join ' ', $interp, $_;
+                map{ $runs->{$lang}->{$prob}->{$_} = run_command( join ' ', $interp, $_ );
                    } sort values %{$solutions->{$lang}->{$prob}}
                                                         #4 get the right file paths for the problem
               } @{$requested->{prob}}                   #3 for every problem that was requested
@@ -68,22 +70,42 @@ map{ my $lang=$_;
    } @{$requested->{lang}};                             #1 for every language requested
 
 
-D $runs;
-D $requested;
+sub run_command {
+   my $cmd = shift;
+   my $sw = Benchmark::Stopwatch::Pause->new->start->pause;
+   for (1..$count) {
+      $sw->unpause($_);
+      system($cmd);
+      $sw->pause;
+      # if you want to check the results.... do it here.
+   }
+   $sw->stop;
 
-
-sub run_command {}
-
+   my $data = $sw->as_unpaused_data;
+   shift @{$data->{laps}}; # no point in keeping _start_
+   my @times = map{$_->{elapsed_time}} @{$data->{laps}};
+   return { max   => max(@times),
+            min   => min(@times),
+            times => \@times,
+            total => $data->{total_elapsed_time},
+            avg   => $data->{total_elapsed_time}/scalar(@times),
+          };
+}
 
 
 #---------------------------------------------------------------------------
 #  Run the right function for the output
 #---------------------------------------------------------------------------
+main->$cmd(); #dispatch to the 'right' output
 sub report {
-   D {SOL => $solutions};
+  D {REPORT => $runs}; 
 }
-sub data {
+sub data {json(@_)};
+sub json {
+   use JSON;
+   print encode_json($runs);
 }
 sub graph {
+  D {GRAPH => $runs}; 
 }
 
