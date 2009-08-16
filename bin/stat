@@ -38,13 +38,12 @@ sub setup {
 
    # now lets parse out what was passed to us via ARGV
    foreach (@ARGV) {
+      $_ = sprintf( q{%03d}, $_ ) if looks_like_number($_) ;
       if ($c->stash->{implementation}->{$_}) {
          push @{$c->options->{implementation}}, $_;
       }
-      else {
-         my $p = sprintf( q{%03d}, $_);
-         push @{$c->options->{problem}}, $p 
-            if $c->stash->{problem}->{$p};
+      elsif ($c->stash->{problem}->{$_} ) {
+         push @{$c->options->{problem}}, $_; 
       }
    }
 
