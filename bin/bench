@@ -121,6 +121,7 @@ sub report {
    
    
 }
+sub rawdata { D $runs };
 sub data {json(@_)}; #alias data -> json for now
 sub json {
    use JSON;
