@@ -55,8 +55,12 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
                :                      'opt';
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
+
+# If nothing was requested supply all available options
+$requested->{lang} = {map{$_ => 1} keys %$solutions} unless defined $requested->{lang};
+$requested->{prob} = $problems unless defined $requested->{prob};
+
 map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested; #revert the unique values to an arrayref
-# !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
 
 # build out the 'command' to run pulling the right interp and files, then run them
 my $runs = {};
