@@ -8,3 +8,6 @@ interp:
     - /usr/bin/perl
   parrot:
     - /usr/bin/parrot
+  ruby:
+    - /usr/bin/ruby
+  erlang:

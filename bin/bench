@@ -15,7 +15,7 @@ sub D (@){print Dumper(@_)}; #so I'm lazy
 # what are we to be doing?
 my $default_cmd = 'report';
 my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
-my $count = 50; #100
+my $count = 5; #100
 my $hide_cmd_output = 1;
 
 #---------------------------------------------------------------------------
