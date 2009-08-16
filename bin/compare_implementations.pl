@@ -12,6 +12,8 @@ my %interp = (
     perl5  => $ENV{PERL5} || 'perl5.10',
     # we should change perl6 to rakudo
     perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
+    ruby   => $ENV{RUBY} || 'ruby',
+    erlang => $ENV{ERLANG} || 'escript',
 );
 
 my ($profile_lang,$euler_problem,$count) = @ARGV;
@@ -22,7 +24,7 @@ $count ||= 1000;
 
 my $code_dir = catdir($profile_lang,$euler_problem);
 die "Euler Project Problem #$euler_problem for $profile_lang does not exist!" unless -e $code_dir;
-my @codez = glob catdir($code_dir,'*');
+my @codez = grep { $_ !~ /~$/ } glob catdir($code_dir,'*');
 
 my %bench_data =
     map {
