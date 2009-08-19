@@ -14,6 +14,7 @@ sub D (@){print Dumper(@_)}; #so I'm lazy
 
 my $default = { cmd   => 'report',
                 count => 100,
+                order => 'run', # if you list a key
               };
 
 
@@ -66,7 +67,10 @@ foreach (keys %{ $requested->{opt} }) {
       delete $requested->{opt}->{$_};
    }
 }
-$requested->{opt}->{count} = $requested->{opt}->{count} || $default->{count};
+
+# work out if there was a option specificed, or should we just use the default?
+map { $requested->{opt}->{$_} = $requested->{opt}->{$_} || $default->{$_};
+    } qw{count order};
 
 # If nothing was requested supply all available options
 $requested->{lang} = {map{$_ => 1} keys %$solutions} unless defined $requested->{lang};
@@ -76,16 +80,24 @@ map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys
 
 
 # build out the 'command' to run pulling the right interp and files, then run them
-my $runs = {};
+my $runs = [];
 map{ my $lang=$_; 
      map { my $interp = $_;
            map{ my $prob = $_;
-                map{ $runs->{$lang}->{$interp}->{$prob}->{$_} = run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' );
+                map{ push @$runs, { language    => $lang,
+                                    interpreter => $interp,
+                                    problem     => $prob,
+                                    file        => $_,
+                                    %{ run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' )}
+                                  };
                    } sort values %{$solutions->{$lang}->{$prob}} #4 now get every path
               } @{$requested->{prob}}                   #3 for every problem that was requested
          } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
    } @{$requested->{lang}};                             #1 for every language requested
 
+
+@$runs = sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs
+   if $runs->[0]->{$requested->{opt}->{order}};
 
 sub run_command {
    my $cmd = shift;
@@ -115,27 +127,18 @@ sub run_command {
 main->$cmd(); #dispatch to the 'right' output
 sub report {
    my $root_fmt = sprintf q{%%%ds %%%ds %%%ds %%%ds},
-                          max( map{length} keys %$runs ),                                #language
-                          max( map{length} map{keys %$_} values %$runs ),                #interp
-                          max( map{length} map{keys %$_} map{values %$_} values %$runs ),  #prob
-                          max( map{length} map{map{keys %$_} values %$_} map{values %$_} values %$runs );#file
+                          max( map{length} map{$_->{language}}    @$runs ),
+                          max( map{length} map{$_->{interpreter}} @$runs ),
+                          max( map{length} map{$_->{problem}}     @$runs ),
+                          max( map{length} map{$_->{file}}        @$runs );
    printf qq{$root_fmt   min    max    avg   total\n}, '', '', '', ''; 
-   foreach my $lang (keys %$runs) {
-      foreach my $interp (keys %{$runs->{$lang}} ) {
-         foreach my $prob (keys %{$runs->{$lang}->{$interp}} ) {
-            foreach my $file ( keys %{$runs->{$lang}->{$interp}->{$prob}} ) {
-               printf qq{$root_fmt  %02.3f  %02.3f  %02.3f  %02.3f\n},
-                      $lang, $interp, $prob, $file, 
-                      map {$runs->{$lang}->{$interp}->{$prob}->{$file}->{$_}} qw{min max avg total};
 
-               
-            }
-         }
-      }
-   }
-   
-   
+   map{ my $row = $_;
+        printf qq{$root_fmt  %02.3f  %02.3f  %02.3f  %02.3f\n},
+               map{ $row->{$_} } qw{language interpreter problem file min max avg total};
+      } @$runs;
 }
+
 sub rawdata { D $runs };
 sub data {json(@_)}; #alias data -> json for now
 sub json {
