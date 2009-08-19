@@ -6,6 +6,7 @@ interp:
     - /usr/bin/perl6
   perl5:
     - /usr/bin/perl
+    - /usr/bin/env perl
   parrot:
     - /usr/bin/parrot
   ruby:
