@@ -1,8 +1,7 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 
 use strict;
 use warnings;
-use Util::Log;
 
 =pod
 The sum of the squares of the first ten natural numbers is,
@@ -17,5 +16,14 @@ Find the difference between the sum of the squares of the first one hundred natu
 
 =cut
 
+my $sum = 0;
+my $sum_of_squares = 0;
+
+for my $i (1..100) {
+  $sum += $i;
+  $sum_of_squares += $i * $i
+}
+
+print($sum * $sum - $sum_of_squares, "\n");
 
 
