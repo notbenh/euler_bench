@@ -118,8 +118,8 @@ sub report {
                           max( map{length} keys %$runs ),                                #language
                           max( map{length} map{keys %$_} values %$runs ),                #interp
                           max( map{length} map{keys %$_} map{values %$_} values %$runs ),  #prob
-                          max( map{length} map{map{keys %$_} values %$_} values %$runs );#file
-   printf qq{$root_fmt   min    max    avg   total\n}, '', '', ''; 
+                          max( map{length} map{map{keys %$_} values %$_} map{values %$_} values %$runs );#file
+   printf qq{$root_fmt   min    max    avg   total\n}, '', '', '', ''; 
    foreach my $lang (keys %$runs) {
       foreach my $interp (keys %{$runs->{$lang}} ) {
          foreach my $prob (keys %{$runs->{$lang}->{$interp}} ) {
