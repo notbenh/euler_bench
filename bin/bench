@@ -95,7 +95,7 @@ map{ my $lang=$_;
          } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
    } @{$requested->{lang}};                             #1 for every language requested
 
-
+# change the order of the runs if the user has asked for something that is useable
 @$runs = sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs
    if $runs->[0]->{$requested->{opt}->{order}};
 
