@@ -12,10 +12,13 @@ use YAML qw{LoadFile};
 use Benchmark::Stopwatch::Pause; # it looks like theres the chance that we'll be doing some testing in the looping... this will allows us to not capture our time.
 sub D (@){print Dumper(@_)}; #so I'm lazy 
 
+my $default = { cmd   => 'report',
+                count => 100,
+              };
+
+
 # what are we to be doing?
-my $default_cmd = 'report';
-my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default_cmd;
-my $count = 50; #100
+my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default->{cmd};
 my $hide_cmd_output = 1;
 
 #---------------------------------------------------------------------------
@@ -55,17 +58,30 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
                :                      'opt';
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
-map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } keys %$requested; #revert the unique values to an arrayref
-# !!TODO!! ? default should be that if a language/problem was not given then you want everything ?
 
-# build out the 'command' to run pulling the right interp and files
+foreach (keys %{ $requested->{opt} }) {
+   if ( $_ =~ m/^--/ ) {
+      my ($key,$value) = $_ =~ m/^--(.*?)=(.*)/;
+      $requested->{opt}->{$key} = $value || $requested->{opt}->{$_};
+      delete $requested->{opt}->{$_};
+   }
+}
+$requested->{opt}->{count} = $requested->{opt}->{count} || $default->{count};
+
+# If nothing was requested supply all available options
+$requested->{lang} = {map{$_ => 1} keys %$solutions} unless defined $requested->{lang};
+$requested->{prob} = $problems unless defined $requested->{prob};
+
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to an arrayref
+
+
+# build out the 'command' to run pulling the right interp and files, then run them
 my $runs = {};
 map{ my $lang=$_; 
      map { my $interp = $_;
            map{ my $prob = $_;
                 map{ $runs->{$lang}->{$prob}->{$_} = run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' );
-                   } sort values %{$solutions->{$lang}->{$prob}}
-                                                        #4 get the right file paths for the problem
+                   } sort values %{$solutions->{$lang}->{$prob}} #4 now get every path
               } @{$requested->{prob}}                   #3 for every problem that was requested
          } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
    } @{$requested->{lang}};                             #1 for every language requested
@@ -74,7 +90,7 @@ map{ my $lang=$_;
 sub run_command {
    my $cmd = shift;
    my $sw = Benchmark::Stopwatch::Pause->new->start->pause;
-   for (1..$count) {
+   for (1..$requested->{opt}->{count}) {
       $sw->unpause($_);
       my $rv = qx($cmd); #better trap output for use if needed
       $sw->pause;
@@ -99,8 +115,26 @@ sub run_command {
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
 sub report {
-  D {REPORT => $runs}; 
+   my $root_fmt = sprintf q{%%%ds %%%ds %%%ds},
+                          max( map{length} keys %$runs ),                                #language
+                          max( map{length} map{keys %$_} values %$runs ),                #prob
+                          max( map{length} map{map{keys %$_} values %$_} values %$runs );#file
+   printf qq{$root_fmt   min    max    avg   total\n}, '', '', ''; 
+   foreach my $lang (keys %$runs) {
+      foreach my $prob (keys %{$runs->{$lang}} ) {
+         foreach my $file ( keys %{$runs->{$lang}->{$prob}} ) {
+            printf qq{$root_fmt  %02.3f  %02.3f  %02.3f  %02.3f\n},
+                   $lang, $prob, $file, 
+                   map {$runs->{$lang}->{$prob}->{$file}->{$_}} qw{min max avg total};
+
+            
+         }
+      }
+   }
+   
+   
 }
+sub rawdata { D $runs };
 sub data {json(@_)}; #alias data -> json for now
 sub json {
    use JSON;
