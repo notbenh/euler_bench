@@ -1,0 +1,13 @@
+---
+alias:
+  rakudo: perl6
+interp:
+  perl6:
+    - /usr/bin/perl6
+  perl5:
+    - /usr/bin/perl
+  parrot:
+    - /usr/bin/parrot
+  ruby:
+    - /usr/bin/ruby
+  erlang:
