@@ -1,14 +1,26 @@
 ---
-alias:
-  rakudo: perl6
-interp:
-  perl6:
-    - /usr/bin/perl6
-  perl5:
-    - /usr/bin/perl
-    - /usr/bin/env perl
+default:
+  count : 100
+  order : run
+  cmd   : report
+  hide_cmd_output : 1
+language:
+  rakudo :
+    problem_set : perl6
+    interp :
+      - /usr/bin/perl6
+      - /usr/bin/rakudo
+  perl6 :
+  perl5 :
+    interp :
+      - /usr/bin/perl
+      - /usr/bin/env perl
   parrot:
-    - /usr/bin/parrot
+    interp :
+      - /usr/bin/parrot
   ruby:
-    - /usr/bin/ruby
+    interp :
+      - /usr/bin/ruby
   erlang:
+    interp :
+      - /usr/bin/erlang
