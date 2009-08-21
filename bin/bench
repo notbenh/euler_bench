@@ -34,9 +34,15 @@ $requested->{prob} = problems_hash unless defined $requested->{prob};
 
 map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
 
-
-
+#---------------------------------------------------------------------------
+#  Building up the data set
+#---------------------------------------------------------------------------
 my $runs = build_runs($requested);
+
+if ($runs->[0]->{$requested->{opt}->{order}}) {
+  $runs = [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs];
+}
+
 #---------------------------------------------------------------------------
 #  Run the right function for the output
 #---------------------------------------------------------------------------
