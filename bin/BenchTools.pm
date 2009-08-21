@@ -89,13 +89,14 @@ sub build_runs {
                         };
                       } sort values %{solutions()->{$lang}->{$prob}} #4 now get every path
                  } @{$requested->{prob}}                   #3 for every problem that was requested
-            } @{ config()->{language}->{$lang}->{interp} } #2 for every interep for that language in the config
+            } @{ $requested->{interp}->{$lang} }           #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
    ];
 }
 
 sub run_command {
    my ($cmd,$count) = @_;
+   $count = config()->{default}->{count} unless defined $count;
    my $sw = Benchmark::Stopwatch::Pause->new->start->pause;
    for (1..$count) {
       $sw->unpause($_);
@@ -112,7 +113,8 @@ sub run_command {
             min   => min(@times),
             times => \@times,
             total => $data->{total_elapsed_time},
-            avg   => $data->{total_elapsed_time}/scalar(@times),
+            avg   => (scalar(@times)) ? $data->{total_elapsed_time}/scalar(@times)
+                                      : 0,
           };
 
 }

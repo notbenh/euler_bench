@@ -31,8 +31,16 @@ foreach (keys %{ $requested->{opt} }) {
 # If nothing was requested supply all available options
 $requested->{lang} = languages_hash unless defined $requested->{lang};
 $requested->{prob} = problems_hash unless defined $requested->{prob};
-
 map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
+
+$requested->{interp} = {map{ $_ => [map{$_} 
+                                    grep{ -x $_ } 
+                                    @{config()->{language}->{$_}->{interp}} 
+                                   ]
+                           } @{$requested->{lang}}
+                       };
+
+
 
 #---------------------------------------------------------------------------
 #  Building up the data set
