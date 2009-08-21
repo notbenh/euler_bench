@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 use BenchTools;
+use List::Util qw{min max};
 use Scalar::Util qw{looks_like_number};
 
 # what are we to be doing?
@@ -36,23 +37,22 @@ map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys
 
 
 my $runs = build_runs($requested);
-die D $runs;
 #---------------------------------------------------------------------------
 #  Run the right function for the output
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
 sub report {
    my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
-                          max( map{length} map{$_->{language}}    $runs ),
-                          max( map{length} map{$_->{interpreter}} $runs ),
-                          max( map{length} map{$_->{problem}}     $runs ),
-                          max( map{length} map{$_->{file}}        $runs );
+                          max( map{length} map{$_->{language}}    @$runs ),
+                          max( map{length} map{$_->{interpreter}} @$runs ),
+                          max( map{length} map{$_->{problem}}     @$runs ),
+                          max( map{length} map{$_->{file}}        @$runs );
    printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
 
    map{ my $row = $_;
         printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
                map{ $row->{$_} } qw{language interpreter problem file min max avg total};
-      } $runs;
+      } @$runs;
 }
 
 sub rawdata { D $runs };

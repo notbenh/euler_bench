@@ -76,16 +76,13 @@ memoize('build_runs');
 sub build_runs {
    my $requested = shift;
    [ map{ my $lang=$_; 
-D {LANG => $lang};
         map { my $interp = $_;
-D {LANG => $interp};
               map{ my $prob = $_;
-D {LANG => $prob};
                    map{ { language    => $lang,
                           interpreter => $interp,
                           problem     => $prob,
                           file        => $_,
-                          %{ run_command( join ' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : '',
+                          %{ run_command( join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : ''),
                                           $requested->{opt}->{count}
                                         )
                            }
