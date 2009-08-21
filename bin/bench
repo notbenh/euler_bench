@@ -14,9 +14,9 @@ my $requested = {};
 sub mk_prob{ sprintf q{%03d}, shift }           # standardize the format of problem numbers
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
      $_ = config->{alias}->{$_} || $_;         # alias the input based on the config
-     my $where = (problems_hash()->{$_} ) ? 'prob'    # decide what were doing by the type of data given
-               : (languages_hash()->{$_}) ? 'lang'
-               :                          'opt';
+     my $where = (problems_hash()->{$_} )      ? 'prob'    # decide what were doing by the type of data given
+               : (config()->{language}->{$_}) ? 'lang'
+               :                                 'opt';
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
 
@@ -40,14 +40,14 @@ $requested->{interp} = {map{ $_ => [map{$_}
                            } @{$requested->{lang}}
                        };
 
-
-
 #---------------------------------------------------------------------------
 #  Building up the data set
 #---------------------------------------------------------------------------
 my $runs = build_runs($requested);
 
-if ($runs->[0]->{$requested->{opt}->{order}}) {
+if (scalar(@$runs) 
+    && defined $requested->{opt}->{order}
+    && scalar( grep{$_ eq $requested->{opt}->{order}} keys %{$runs->[0]} )) {
   $runs = [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs];
 }
 

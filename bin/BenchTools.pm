@@ -76,20 +76,23 @@ memoize('build_runs');
 sub build_runs {
    my $requested = shift;
    [ map{ my $lang=$_; 
+          my $problem_set =  config()->{language}->{$lang}->{problem_set} || $lang;
         map { my $interp = $_;
               map{ my $prob = $_;
-                   map{ { language    => $lang,
-                          interpreter => $interp,
-                          problem     => $prob,
-                          file        => $_,
+                   my $run = join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : '');
+                   map{ { language     => $lang,
+                          problem_set  => $problem_set,
+                          interpreter  => $interp,
+                          problem      => $prob,
+                          file         => $_,
                           %{ run_command( join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : ''),
                                           $requested->{opt}->{count}
                                         )
                            }
                         };
-                      } sort values %{solutions()->{$lang}->{$prob}} #4 now get every path
+                      } sort values %{solutions()->{$problem_set}->{$prob}} #4 now get every path
                  } @{$requested->{prob}}                   #3 for every problem that was requested
-            } @{ $requested->{interp}->{$lang} }           #2 for every interep for that language in the config
+            } @{ $requested->{interp}->{$lang} }    #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
    ];
 }
