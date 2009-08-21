@@ -1,0 +1,26 @@
+---
+default:
+  count : 100
+  order : run
+  cmd   : report
+  hide_cmd_output : 1
+language:
+  rakudo :
+    problem_set : perl6
+    interp :
+      - /usr/bin/perl6
+      - /usr/bin/rakudo
+  perl6 :
+  perl5 :
+    interp :
+      - /usr/bin/perl
+      - /usr/bin/env perl
+  parrot:
+    interp :
+      - /usr/bin/parrot
+  ruby:
+    interp :
+      - /usr/bin/ruby
+  erlang:
+    interp :
+      - /usr/bin/erlang

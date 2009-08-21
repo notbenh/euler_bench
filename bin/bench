@@ -1,0 +1,81 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use 5.010;
+use BenchTools;
+use List::Util qw{min max};
+use Scalar::Util qw{looks_like_number};
+
+# what are we to be doing?
+my $cmd = (main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
+
+# build out a hash of what was requiested via @ARGV
+my $requested = {};
+sub mk_prob{ sprintf q{%03d}, shift }           # standardize the format of problem numbers
+map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
+     $_ = config->{alias}->{$_} || $_;         # alias the input based on the config
+     my $where = (problems_hash()->{$_} ) ? 'prob'    # decide what were doing by the type of data given
+               : (languages_hash()->{$_}) ? 'lang'
+               :                          'opt';
+     $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
+   } @ARGV;
+
+foreach (keys %{ $requested->{opt} }) {
+   if ( $_ =~ m/^--/ ) {
+      my ($key,$value) = $_ =~ m/^--(.*?)=(.*)/;
+      $requested->{opt}->{$key} = $value || $requested->{opt}->{$_};
+      delete $requested->{opt}->{$_};
+   }
+}
+
+# If nothing was requested supply all available options
+$requested->{lang} = languages_hash unless defined $requested->{lang};
+$requested->{prob} = problems_hash unless defined $requested->{prob};
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
+
+$requested->{interp} = {map{ $_ => [map{$_} 
+                                    grep{ -x $_ } 
+                                    @{config()->{language}->{$_}->{interp}} 
+                                   ]
+                           } @{$requested->{lang}}
+                       };
+
+
+
+#---------------------------------------------------------------------------
+#  Building up the data set
+#---------------------------------------------------------------------------
+my $runs = build_runs($requested);
+
+if ($runs->[0]->{$requested->{opt}->{order}}) {
+  $runs = [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs];
+}
+
+#---------------------------------------------------------------------------
+#  Run the right function for the output
+#---------------------------------------------------------------------------
+main->$cmd(); #dispatch to the 'right' output
+sub report {
+   my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
+                          max( map{length} map{$_->{language}}    @$runs ),
+                          max( map{length} map{$_->{interpreter}} @$runs ),
+                          max( map{length} map{$_->{problem}}     @$runs ),
+                          max( map{length} map{$_->{file}}        @$runs );
+   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
+
+   map{ my $row = $_;
+        printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
+               map{ $row->{$_} } qw{language interpreter problem file min max avg total};
+      } @$runs;
+}
+
+sub rawdata { D $runs };
+sub data {json(@_)}; #alias data -> json for now
+sub json {
+   use JSON;
+   print encode_json($runs);
+}
+sub graph {
+  D {GRAPH => $runs}; 
+}
+
