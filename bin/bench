@@ -2,61 +2,20 @@
 use strict;
 use warnings;
 use 5.010;
-use Cwd qw{abs_path};
-use File::Basename;
-use File::Find;
-use Data::Dumper;
+use BenchTools;
 use Scalar::Util qw{looks_like_number};
-use List::Util qw{min max};
-use YAML qw{LoadFile};
-use Benchmark::Stopwatch::Pause; # it looks like theres the chance that we'll be doing some testing in the looping... this will allows us to not capture our time.
-sub D (@){print Dumper(@_)}; #so I'm lazy 
-
-my $default = { cmd   => 'report',
-                count => 100,
-                order => 'run', # if you list a key
-              };
-
 
 # what are we to be doing?
-my $cmd = (main->can($ARGV[0])) ? shift @ARGV : $default->{cmd};
-my $hide_cmd_output = 1;
-
-#---------------------------------------------------------------------------
-#  What languages, problems, and solutions are available
-#---------------------------------------------------------------------------
-# where are we in the filesystem?
-my $root_dir = [fileparse(abs_path(__FILE__))]->[1];
-my $config   = LoadFile($root_dir . 'config.yaml');  # config is relative to this file
-my $base_dir = basename($root_dir);
-$root_dir =~ s/(.*)$base_dir.?/$1/; # cd ..
-
-# a list of all the languages, what problems have what solutions
-my $solutions = {};
-find(sub{ my $p = $File::Find::name; 
-          $p =~ s/$root_dir//; 
-          my ($lang,$prob,$solution) = split /[\/]/, $p;
-          $solutions->{$lang}->{$prob}->{$solution} = $File::Find::name
-            if $lang !~ m/^(?:bin|inc|[.]git)/ 
-            && defined $lang        # language should be in a useful format
-            && length $lang
-            && defined $solution    # we should have a solution
-            && length $solution     
-            && $solution !~ m/^[.]/ # hide any 'hidden' file
-            ;
-        }, $root_dir);
-
-# a quick list of available problems, just to make the next step easy
-my $problems = { map{$_ => 1} map{keys %$_} values %$solutions};
+my $cmd = (main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
 
 # build out a hash of what was requiested via @ARGV
 my $requested = {};
-sub mk_prob{ sprintf q{%03d}, shift }           
+sub mk_prob{ sprintf q{%03d}, shift }           # standardize the format of problem numbers
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
-     $_ = $config->{alias}->{$_} || $_;         # alias the input based on the config
-     my $where = ($problems->{$_} ) ? 'prob'    # decide what were doing by the type of data given
-               : ($solutions->{$_}) ? 'lang'
-               :                      'opt';
+     $_ = config->{alias}->{$_} || $_;         # alias the input based on the config
+     my $where = (problems_hash()->{$_} ) ? 'prob'    # decide what were doing by the type of data given
+               : (languages_hash()->{$_}) ? 'lang'
+               :                          'opt';
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
 
@@ -68,75 +27,32 @@ foreach (keys %{ $requested->{opt} }) {
    }
 }
 
-# work out if there was a option specificed, or should we just use the default?
-map { $requested->{opt}->{$_} = $requested->{opt}->{$_} || $default->{$_};
-    } qw{count order};
-
 # If nothing was requested supply all available options
-$requested->{lang} = {map{$_ => 1} keys %$solutions} unless defined $requested->{lang};
-$requested->{prob} = $problems unless defined $requested->{prob};
+$requested->{lang} = languages_hash unless defined $requested->{lang};
+$requested->{prob} = problems_hash unless defined $requested->{prob};
 
-map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to an arrayref
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
 
 
-# build out the 'command' to run pulling the right interp and files, then run them
-my $runs = [];
-map{ my $lang=$_; 
-     map { my $interp = $_;
-           map{ my $prob = $_;
-                map{ push @$runs, { language    => $lang,
-                                    interpreter => $interp,
-                                    problem     => $prob,
-                                    file        => $_,
-                                    %{ run_command( join ' ', $interp, $_, ($hide_cmd_output) ? '&> /dev/null' : '' )}
-                                  };
-                   } sort values %{$solutions->{$lang}->{$prob}} #4 now get every path
-              } @{$requested->{prob}}                   #3 for every problem that was requested
-         } @{ $config->{interp}->{$lang} }              #2 for every interep for that language in the config
-   } @{$requested->{lang}};                             #1 for every language requested
 
-# change the order of the runs if the user has asked for something that is useable
-@$runs = sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs
-   if $runs->[0]->{$requested->{opt}->{order}};
-
-sub run_command {
-   my $cmd = shift;
-   my $sw = Benchmark::Stopwatch::Pause->new->start->pause;
-   for (1..$requested->{opt}->{count}) {
-      $sw->unpause($_);
-      my $rv = qx($cmd); #better trap output for use if needed
-      $sw->pause;
-      # if you want to check the results.... do it here.
-   }
-   $sw->stop;
-
-   my $data = $sw->as_unpaused_data;
-   shift @{$data->{laps}}; # no point in keeping _start_
-   my @times = map{$_->{elapsed_time}} @{$data->{laps}};
-   return { max   => max(@times),
-            min   => min(@times),
-            times => \@times,
-            total => $data->{total_elapsed_time},
-            avg   => $data->{total_elapsed_time}/scalar(@times),
-          };
-}
-
+my $runs = build_runs($requested);
+die D $runs;
 #---------------------------------------------------------------------------
 #  Run the right function for the output
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
 sub report {
    my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
-                          max( map{length} map{$_->{language}}    @$runs ),
-                          max( map{length} map{$_->{interpreter}} @$runs ),
-                          max( map{length} map{$_->{problem}}     @$runs ),
-                          max( map{length} map{$_->{file}}        @$runs );
+                          max( map{length} map{$_->{language}}    $runs ),
+                          max( map{length} map{$_->{interpreter}} $runs ),
+                          max( map{length} map{$_->{problem}}     $runs ),
+                          max( map{length} map{$_->{file}}        $runs );
    printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
 
    map{ my $row = $_;
         printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
                map{ $row->{$_} } qw{language interpreter problem file min max avg total};
-      } @$runs;
+      } $runs;
 }
 
 sub rawdata { D $runs };
