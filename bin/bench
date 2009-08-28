@@ -2,9 +2,16 @@
 use strict;
 use warnings;
 use 5.010;
-use BenchTools;
+BEGIN {
+   # HORRYA LETO IS MY HERO
+   my ($lib) = __FILE__ =~ m{(.*)bench$};
+   $lib =~ s{bin/?$}{lib};
+   push @INC, $lib
+};
+
 use List::Util qw{min max};
 use Scalar::Util qw{looks_like_number};
+use BenchTools; 
 
 # what are we to be doing?
 my $cmd = (main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
