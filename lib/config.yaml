@@ -1,7 +1,7 @@
 ---
 default:
   count : 100
-  order : run
+  order : total
   cmd   : report
   hide_cmd_output : 1
 language:
