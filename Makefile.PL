@@ -25,6 +25,8 @@ requires
     'Benchmark'             => '0';
 requires
     'JSON'                  => '0';
+requires
+    'Math::Primality'       => '0.04';
 
 
 auto_install;
