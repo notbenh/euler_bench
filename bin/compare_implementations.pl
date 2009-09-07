@@ -14,6 +14,7 @@ my %interp = (
     perl6  => $ENV{PERL6} || catfile( $ENV{HOME},qw{git rakudo perl6}),
     ruby   => $ENV{RUBY} || 'ruby',
     erlang => $ENV{ERLANG} || 'escript',
+    haskell => $ENV{GHC} || 'runghc',
 );
 
 my ($profile_lang,$euler_problem,$count) = @ARGV;
