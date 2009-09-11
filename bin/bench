@@ -52,10 +52,14 @@ $requested->{interp} = {map{ $_ => [map{$_}
 #---------------------------------------------------------------------------
 my $runs = build_runs($requested);
 
+my $order_numeric = { map{$_ => 1} qw{min avg max file} };
+
 if (scalar(@$runs) 
     && defined $requested->{opt}->{order}
     && scalar( grep{$_ eq $requested->{opt}->{order}} keys %{$runs->[0]} )) {
-  $runs = [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs];
+  $runs = ($order_numeric->{$requested->{opt}->{order}})
+        ? [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs]
+        : [sort {$a->{$requested->{opt}->{order}} cmp $b->{$requested->{opt}->{order}}} @$runs];
 }
 
 #---------------------------------------------------------------------------
