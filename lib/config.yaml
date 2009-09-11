@@ -24,3 +24,7 @@ language:
   erlang:
     interp :
       - /usr/bin/erlang
+  haskell :
+    interp :
+      - /usr/bin/env runhaskell
+      - /usr/local/bin/runhaskell
