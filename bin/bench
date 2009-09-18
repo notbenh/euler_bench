@@ -15,7 +15,7 @@ use Scalar::Util qw{looks_like_number};
 use BenchTools; 
 
 # what are we to be doing?
-my $cmd = (main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
+my $cmd = (defined $ARGV[0] && main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
 
 # build out a hash of what was requiested via @ARGV
 my $requested = {};
@@ -68,6 +68,7 @@ if (scalar(@$runs)
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
 sub report {
+   die "No Euler Problem for that language" unless @$runs;
    my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
                           max( map{length} map{$_->{language}}    @$runs ),
                           max( map{length} map{$_->{interpreter}} @$runs ),
