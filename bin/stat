@@ -4,7 +4,8 @@ use warnings;
 use 5.010;
 BEGIN {
    # LETO IS MY HERO
-   my ($lib) = __FILE__ =~ m{(.*)stat$};
+   use Cwd qw{abs_path};
+   my ($lib) = abs_path(__FILE__) =~ m{(.*)stat$};
    $lib =~ s{bin/?$}{lib};
    push @INC, $lib
 };
