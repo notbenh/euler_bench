@@ -1,0 +1,137 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use 5.010;
+BEGIN {
+   # LETO IS MY HERO
+   my ($lib) = __FILE__ =~ m{(.*)stat2$};
+   $lib =~ s{bin/?$}{lib};
+   push @INC, $lib
+};
+
+use List::Util qw{min max};
+use Scalar::Util qw{looks_like_number};
+use BenchTools; 
+
+# what are we to be doing (overview | report)
+my $cmd = (defined $ARGV[0] && main->can($ARGV[0])) ? shift @ARGV : 'overview' ;
+main->$cmd;
+
+sub overview {
+   my $total_solutions = scalar(keys %{problems_hash()});
+   my $fmt = join ' ', '%8s', map{sprintf q{%%%ds}, length($_)} languages;
+   $fmt.="\n";
+printf $fmt, ' ', languages;
+printf $fmt, '+1 solve', map{ my $L = $_; 
+                              scalar( grep{$_>1} map{scalar(keys %$_) } values %{ solutions->{$L} } )  
+                            } languages;
+printf $fmt, 'done in',  map{sprintf q{%d/%d}, scalar( keys %{ solutions->{$_}}), $total_solutions } languages;
+}
+
+sub report {
+=pod
+     parrot perl6 haskell ruby perl5 erlang
+ 000      1     1       1    1     2      1
+=cut
+   my $fmt = join ' ', '%4s', map{sprintf q{%%%ds}, length($_)} languages;
+   $fmt.="\n";
+   printf $fmt, ' ', languages;
+   for my $prob ( sort keys %{ problems_hash() } ) {
+      printf $fmt, $prob, map{($_ eq '0')? '-' : $_ } 
+                          map{ scalar( keys %{ solutions->{$_}->{$prob} })
+                             } languages;
+   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+__END__
+
+
+# build out a hash of what was requiested via @ARGV
+my $requested = {};
+sub mk_prob{ sprintf q{%03d}, shift }           # standardize the format of problem numbers
+map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
+     $_ = config->{alias}->{$_} || $_;         # alias the input based on the config
+     my $where = (problems_hash()->{$_} )      ? 'prob'    # decide what were doing by the type of data given
+               : (config()->{language}->{$_}) ? 'lang'
+               :                                 'opt';
+     $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
+   } @ARGV;
+
+foreach (keys %{ $requested->{opt} }) {
+   if ( $_ =~ m/^--/ ) {
+      my ($key,$value) = $_ =~ m/^--(.*?)=(.*)/;
+      $requested->{opt}->{$key} = $value || $requested->{opt}->{$_};
+      delete $requested->{opt}->{$_};
+   }
+}
+
+# If nothing was requested supply all available options
+$requested->{lang} = languages_hash unless defined $requested->{lang};
+$requested->{prob} = problems_hash unless defined $requested->{prob};
+map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
+
+$requested->{interp} = {map{ $_ => [map{$_} 
+                                    grep{ -x $_ } 
+                                    @{config()->{language}->{$_}->{interp}} 
+                                   ]
+                           } @{$requested->{lang}}
+                       };
+
+#---------------------------------------------------------------------------
+#  Building up the data set
+#---------------------------------------------------------------------------
+my $runs = build_runs($requested);
+
+my $order_numeric = { map{$_ => 1} qw{min avg max file} };
+
+if (scalar(@$runs) 
+    && defined $requested->{opt}->{order}
+    && scalar( grep{$_ eq $requested->{opt}->{order}} keys %{$runs->[0]} )) {
+  $runs = ($order_numeric->{$requested->{opt}->{order}})
+        ? [sort {$a->{$requested->{opt}->{order}} <=> $b->{$requested->{opt}->{order}}} @$runs]
+        : [sort {$a->{$requested->{opt}->{order}} cmp $b->{$requested->{opt}->{order}}} @$runs];
+}
+
+#---------------------------------------------------------------------------
+#  Run the right function for the output
+#---------------------------------------------------------------------------
+main->$cmd(); #dispatch to the 'right' output
+sub report {
+   my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
+                          max( map{length} map{$_->{language}}    @$runs ),
+                          max( map{length} map{$_->{interpreter}} @$runs ),
+                          max( map{length} map{$_->{problem}}     @$runs ),
+                          max( map{length} map{$_->{file}}        @$runs );
+   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
+
+   map{ my $row = $_;
+        printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
+               map{ $row->{$_} } qw{language interpreter problem file min max avg total};
+      } @$runs;
+}
+
+sub rawdata { D $runs };
+sub data {json(@_)}; #alias data -> json for now
+sub json {
+   use JSON;
+   print encode_json($runs);
+}
+sub graph {
+  D {GRAPH => $runs}; 
+}
+
