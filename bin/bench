@@ -5,7 +5,7 @@ use 5.010;
 BEGIN {
    # LETO IS MY HERO
    use Cwd qw{abs_path};
-   my ($lib) = abs_path(__FILE__) =~ m{(.*)stat$};
+   my ($lib) = abs_path(__FILE__) =~ m{(.*)bench$};
    $lib =~ s{bin/?$}{lib};
    push @INC, $lib
 };
