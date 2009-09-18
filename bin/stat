@@ -4,7 +4,7 @@ use warnings;
 use 5.010;
 BEGIN {
    # LETO IS MY HERO
-   my ($lib) = __FILE__ =~ m{(.*)stat2$};
+   my ($lib) = __FILE__ =~ m{(.*)stat$};
    $lib =~ s{bin/?$}{lib};
    push @INC, $lib
 };
