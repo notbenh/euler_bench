@@ -23,7 +23,8 @@ sub mk_prob{ sprintf q{%03d}, shift }           # standardize the format of prob
 map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem numbers
      $_ = config->{alias}->{$_} || $_;         # alias the input based on the config
      my $where = (problems_hash()->{$_} )      ? 'prob'    # decide what were doing by the type of data given
-               : (config()->{language}->{$_}) ? 'lang'
+               : (config()->{language}->{$_})  ? 'lang'
+               : ($_ =~ m/\d+:\d+/)            ? 'prob'    # !!! HACK FIXME TODO
                :                                 'opt';
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;

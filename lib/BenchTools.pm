@@ -78,7 +78,9 @@ sub build_runs {
    [ map{ my $lang=$_; 
           my $problem_set =  config()->{language}->{$lang}->{problem_set} || $lang;
         map { my $interp = $_;
-              map{ my $prob = $_;
+              map{ my ($prob,@imp) = split /[:,]/, $_;
+                   $prob = sprintf '%03d', $prob;     #ugly formating changes
+                   @imp = map{sprintf '%02d', $_}@imp;#ugly formating changes
                    my $run = join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : '');
                    map{ { language     => $lang,
                           problem_set  => $problem_set,
@@ -90,7 +92,9 @@ sub build_runs {
                                         )
                            }
                         };
-                      } sort values %{solutions()->{$problem_set}->{$prob}} #4 now get every path
+                      } grep{ my $v = $_;
+                              (scalar(@imp)) ? grep{$v=~m{$prob[/\\]$_}} @imp : 1 ;
+                            } sort values %{solutions()->{$problem_set}->{$prob}} #4 now get every path
                  } @{$requested->{prob}}                   #3 for every problem that was requested
             } @{ $requested->{interp}->{$lang} }    #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
