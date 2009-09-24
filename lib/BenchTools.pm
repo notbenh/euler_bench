@@ -41,7 +41,15 @@ memoize('base_dir');
 sub base_dir { basename([fileparse(abs_path(__FILE__))]->[1]) }
 
 memoize('config');
-sub config { LoadFile( [fileparse(abs_path(__FILE__))]->[1] . 'config.yaml') }
+sub config {
+    my $default_conf = [fileparse(abs_path(__FILE__))]->[1] . 'config.yaml';
+    my $user_conf    = $ENV{BENCH_CONFIG};
+    if ($user_conf && -e $user_conf) {
+        LoadFile( $user_conf );
+    } else {
+        LoadFile( $default_conf );
+    }
+}
 
 memoize('solutions');
 sub solutions {
