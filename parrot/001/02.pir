@@ -24,6 +24,5 @@ found:
     if i > max goto done
     goto loop
 done:
-    print sum
-    print "\n"
+    say sum
 .end
