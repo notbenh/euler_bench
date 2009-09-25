@@ -29,6 +29,12 @@ map{ $_ = mk_prob($_) if looks_like_number($_); # standardize the problem number
      $requested->{$where}->{$_} = 1;            # build a hash so we can uniqui-fy the values
    } @ARGV;
 
+for my $leftover (keys %{$requested->{opt}}) {
+    if (-e $leftover) {
+        $requested->{benchee}{$leftover} = 1;
+    }
+}
+
 foreach (keys %{ $requested->{opt} }) {
    if ( $_ =~ m/^--/ ) {
       my ($key,$value) = $_ =~ m/^--(.*?)=(.*)/;
