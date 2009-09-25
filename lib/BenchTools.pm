@@ -95,6 +95,7 @@ sub build_runs {
                           interpreter  => $interp,
                           problem      => $prob,
                           file         => $_,
+                          solution     => join( '', $prob, ( m/^(?:.*$prob)(.*)/)),
                           %{ run_command( join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : ''),
                                           $requested->{opt}->{count}
                                         )
