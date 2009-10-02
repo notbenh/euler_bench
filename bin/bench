@@ -73,7 +73,7 @@ foreach (keys %{ $requested->{opt} }) {
 
 # If nothing was requested supply all available options
 $requested->{lang} = languages_hash unless defined $requested->{lang};
-$requested->{prob} = problems_hash unless defined $requested->{prob};
+$requested->{prob} = problems_hash unless defined $requested->{prob} || $requested->{benchee};
 map{ $requested->{$_} = [sort keys %{$requested->{$_}}] } grep{$_ ne 'opt'} keys %$requested; #revert the unique values to a
 
 $requested->{interp} = {map{ $_ => [map{$_} 
@@ -108,13 +108,13 @@ sub report {
    my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
                           max( map{length} map{$_->{language}}    @$runs ),
                           max( map{length} map{$_->{interpreter}} @$runs ),
-                          max( map{length} map{$_->{problem}}     @$runs ),
+                          max( map{length} (defined $_->{problems})?map{$_->{problem}}@$runs:''),
                           max( map{length} map{$_->{file}}        @$runs );
    printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
 
    map{ my $row = $_;
         printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
-               map{ $row->{$_} } qw{language interpreter problem file min max avg total};
+               map{ $row->{$_} || '' } qw{language interpreter problem file min max avg total};
       } @$runs;
 }
 

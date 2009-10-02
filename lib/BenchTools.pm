@@ -86,7 +86,23 @@ sub build_runs {
    [ map{ my $lang=$_; 
           my $problem_set =  config()->{language}->{$lang}->{problem_set} || $lang;
         map { my $interp = $_;
+             
+              my @benchee =
+              map { { language     => $lang,
+                      interpreter  => $interp,
+                      file         => $_,
+                      %{ run_command( join(' ', $interp, $_, 
+                                           (config()->{hide_cmd_output}) ? '&> /dev/null' : ''
+                                          ),
+                                      $requested->{opt}->{count}
+                                    )
+                       },
+                    }
+                  } @{ $requested->{benchee}};
+              
+              my @probs =
               map{ my ($prob,@imp) = split /[:,]/, $_;
+                   return 'xxx' unless defined $prob;
                    $prob = sprintf '%03d', $prob;     #ugly formating changes
                    @imp = map{sprintf '%02d', $_}@imp;#ugly formating changes
                    my $run = join(' ', $interp, $_, (config()->{hide_cmd_output}) ? '&> /dev/null' : '');
@@ -104,9 +120,12 @@ sub build_runs {
                       } grep{ my $v = $_;
                               (scalar(@imp)) ? grep{$v=~m{$prob[/\\]$_}} @imp : 1 ;
                             } sort values %{solutions()->{$problem_set}->{$prob}} #4 now get every path
-                 } @{$requested->{prob}}                   #3 for every problem that was requested
+                 } grep{defined} @{$requested->{prob}};
+
+               grep{defined} @benchee, @probs;
             } @{ $requested->{interp}->{$lang} }    #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
+
    ];
 }
 
