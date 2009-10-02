@@ -108,7 +108,7 @@ sub report {
    my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
                           max( map{length} map{$_->{language}}    @$runs ),
                           max( map{length} map{$_->{interpreter}} @$runs ),
-                          max( map{length} (defined $_->{problems})?map{$_->{problem}}@$runs:''),
+                          max( map{length} (defined $_->{problems})?map{$_->{problem}}@$runs:'---'),
                           max( map{length} map{$_->{file}}        @$runs );
    printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
 
