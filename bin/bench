@@ -14,6 +14,34 @@ use List::Util qw{min max};
 use Scalar::Util qw{looks_like_number};
 use BenchTools; 
 
+if (grep{m/-h(?:elp)?/} @ARGV) {
+   print qq{
+   USAGE: bench [output_type] [language] [problem] [options]
+  
+          output_type:
+            report: prints a report to STDOUT with an overview of what was run (default)
+            json:  encodes the data collected from all runs to JSON and then prints to STDOUT
+            rawdata: Data::Dumper output of the data collected
+
+          languages are expected to be non-numeric strings.
+          problems are expected to be numeric strings.
+            It is possible to ask for specific solutions to a problem can be done by listing a problem like 000:01,02 
+
+          options:
+            --count=NNN (default is 100)
+            --order=XXX 
+
+   EXAMPLES:
+
+      bench perl5 0 
+      bench 0 --count=10 --order=language 
+      bench json 000 > all_000.json 
+      bench rawdata perl5 rakudo ruby 
+      bin/bench 0:2 1:1,3 2 perl5 --count=10 
+   \n} ;
+   exit;
+}
+
 # what are we to be doing?
 my $cmd = (defined $ARGV[0] && main->can($ARGV[0])) ? shift @ARGV : config->{default}->{cmd};
 
@@ -59,8 +87,6 @@ $requested->{interp} = {map{ $_ => [map{$_}
 #  Building up the data set
 #---------------------------------------------------------------------------
 my $runs = build_runs($requested);
-use Data::Dumper;
-warn Dumper [ $requested ];
 die "No Euler Problem for that language"  unless @$runs;
 
 my $order_numeric = { map{$_ => 1} qw{min avg max file} };
