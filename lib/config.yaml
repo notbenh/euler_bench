@@ -33,3 +33,6 @@ language:
     post_run : echo 'POST' >> /tmp/run
     interp :
       - /bin/echo
+  java :
+    interp :
+      - /usr/bin/env java
