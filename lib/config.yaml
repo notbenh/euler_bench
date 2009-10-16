@@ -28,3 +28,8 @@ language:
     interp :
       - /usr/bin/env runhaskell
       - /usr/local/bin/runhaskell
+  compiledtest:
+    pre_run : echo 'PRE' >> /tmp/run
+    post_run : echo 'POST' >> /tmp/run
+    interp :
+      - /bin/echo

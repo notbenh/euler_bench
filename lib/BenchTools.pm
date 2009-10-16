@@ -86,6 +86,9 @@ sub build_runs {
    [ map{ my $lang=$_; 
           my $problem_set =  config()->{language}->{$lang}->{problem_set} || $lang;
         map { my $interp = $_;
+              
+              system(config()->{language}->{$lang}->{pre_run})
+                 if defined config()->{language}->{$lang}->{pre_run};
              
               my @benchee =
               map { { language     => $lang,
@@ -122,7 +125,12 @@ sub build_runs {
                             } sort values %{solutions()->{$problem_set}->{$prob}} #4 now get every path
                  } grep{defined} @{$requested->{prob}};
 
+               system(config()->{language}->{$lang}->{post_run})
+                  if defined config()->{language}->{$lang}->{post_run};
+D {PROBS => \@probs};
+
                grep{defined} @benchee, @probs;
+             
             } @{ $requested->{interp}->{$lang} }    #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
 

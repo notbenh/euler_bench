@@ -86,6 +86,7 @@ $requested->{interp} = {map{ $_ => [map{$_}
 #---------------------------------------------------------------------------
 #  Building up the data set
 #---------------------------------------------------------------------------
+D {REQ => $requested};
 my $runs = build_runs($requested);
 die "No Euler Problem for that language"  unless @$runs;
 
