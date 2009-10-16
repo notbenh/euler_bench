@@ -26,7 +26,5 @@ requires
 requires
     'Benchmark::Stopwatch::Pause' => '0';
 
-
-
 auto_install;
 WriteAll();
