@@ -6,8 +6,9 @@ import scala.Math._
 
 // produces a list of divisors of x, in decreasing order, excluding x
 def divisors(x: Long): Seq[Int] = {
-    // start at sqr of x
+    // start at sqrt of x, since that's the largest possible divisor
     val r = round(floor(sqrt(x))).toInt to 1 by -1 
+    // identify divisors 
     r.filter(x % _ == 0)
 }
 
@@ -18,6 +19,5 @@ def isPrime(x: Long): Boolean = {
 
 // pull the first divisor that's prime (also the largest, since 
 // divisors returns in decreasing order
-//val biggun = 13195
 val biggun = 600851475143L
 println(divisors(biggun).filter(isPrime(_)).first)
