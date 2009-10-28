@@ -16,7 +16,7 @@ sub test_prime {
     my $n = shift;
 
     my $x = 3;
-    while( $x < $n ) {
+    while( $x <= sqrt($n) ) {
         return 0 unless $n % $x;
         $x += 2;
     }
