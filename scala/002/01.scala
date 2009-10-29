@@ -18,8 +18,7 @@ def acc_tr_helper(n: Int, sum: Int): Int = n match {
 }
 
 val maxAllowedValue = 4000000
-// perhaps a Projection to infinity instead?
-val fibLessThanMax = (1 to Integer.MAX_VALUE).map(fib(_)).takeWhile(_ < maxAllowedValue)
+val fibLessThanMax = Stream.from(1).map(fib(_)).takeWhile(_ < maxAllowedValue)
 println(fibLessThanMax.filter(_ % 2 == 0).foldLeft(0L)(_ + _))
 
 // http://oldfashionedsoftware.com/2009/07/30/lots-and-lots-of-foldleft-examples/
