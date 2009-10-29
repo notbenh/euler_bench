@@ -1,10 +1,10 @@
 
 def sumOfSquares(xs: Seq[Int]): Long = {
-  xs.foldLeft(0L)((sum, x) => sum + Math.round(Math.pow(x, 2)))
+  (0L /: xs)((sum, x) => sum + Math.round(Math.pow(x, 2)))
 }
 
 def squareOfSum(xs: Seq[Int]): Long = {
-  var sum = xs.foldLeft(0L)((sum, x) => sum + x)
+  var sum = (0L /: xs)((sum, x) => sum + x)
   Math.round(Math.pow(sum, 2))
 }
 
