@@ -36,3 +36,6 @@ language:
   java :
     interp :
       - /usr/bin/env java
+  scala : 
+    interp : 
+      - /opt/local/bin/scala
