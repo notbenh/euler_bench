@@ -3,7 +3,7 @@
 # some modifications by chromatic
 # This runs faster than the Perl 5 implementation with optimized Parrot ~1.7.0
 
-.sub 'main'
+.sub main
     $I0 = 99
     $I1 = 99
     $I3 = 1
@@ -47,5 +47,7 @@ EQUAL_THING:
 SET_MAX:
     $I3 = $I4
     goto OUTER_LOOP
-FINISH: say $I3
+FINISH:
+    print $I3
+    print "\n"
 .end

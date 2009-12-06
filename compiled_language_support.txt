@@ -1,0 +1,21 @@
+Introduction
+
+  To allow compiled lanuages to be run, we have a two pass compile
+  and run. The first pass takes a configurable script name, exec's
+  that script passing the current file. The script will then
+  output another command to be run. It's this command that is 
+  acutally timed.
+
+  All this is done in a jail, which is deleted after each run. No
+  additional cleanup is necessary.
+
+Configuration
+  name of script to executed foreach file
+
+Variables
+  in: name of the file (or directory) currently being evaluated
+
+Return
+  out: command (with args) to be exec'd
+
+

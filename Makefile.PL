@@ -10,10 +10,6 @@ version '0.1.0';
 license 'perl';
 
 requires
-    'App::Rad'              => '0';
-requires
-    'File::Fu'              => '0';
-requires
     'Data::Dumper'          => '0';
 requires
     'Scalar::Util'          => '0';
@@ -29,8 +25,6 @@ requires
     'Math::Primality'       => '0.04';
 requires
     'Benchmark::Stopwatch::Pause' => '0';
-
-
 
 auto_install;
 WriteAll();

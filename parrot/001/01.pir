@@ -1,9 +1,7 @@
 # Euler Problem #1 in PIR
 # Jonathan "Duke" Leto <jonathan@leto.net>
-# This appears to be the same speed as the Perl 5 implementation
-# with Parrot  1.4.0
 
-.sub 'main' :main
+.sub main
    .local int sum, max, m, i
    i   = 1
    max = 999
@@ -22,5 +20,6 @@ found:
     if i > max goto done
     goto loop
 done:
-    say sum
+    print sum
+    print "\n"
 .end
