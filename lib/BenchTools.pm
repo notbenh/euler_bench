@@ -13,6 +13,8 @@ use Benchmark::Stopwatch::Pause;
 
 use Exporter qw{import};
 use Memoize;
+
+# why the hell are we exporting D?
 our @EXPORT = qw{
    D
    root_dir
@@ -127,7 +129,6 @@ sub build_runs {
 
                system(config()->{language}->{$lang}->{post_run})
                   if defined config()->{language}->{$lang}->{post_run};
-D {PROBS => \@probs};
 
                grep{defined} @benchee, @probs;
              
