@@ -1,0 +1,35 @@
+---
+default:
+  count : 100
+  order : total
+  cmd   : report
+  hide_cmd_output : 1
+language:
+  sh :
+    interp :
+      - /bin/sh
+  rakudo :
+    problem_set : perl6
+    interp :
+      - /usr/bin/perl6
+      - /usr/bin/rakudo
+  perl6 :
+  perl5 :
+    interp :
+      - /usr/bin/perl
+      - /usr/bin/env perl
+  parrot:
+    interp :
+      - /Users/leto/src/parrot/parrot-0.8.1/parrot
+      - /Users/leto/src/parrot/parrot-0.8.2/parrot
+      - /Users/leto/src/parrot/parrot-0.9.0/parrot
+      - /Users/leto/src/parrot/parrot-1.0.0/parrot
+      - /Users/leto/src/parrot/parrot-1.1.0/parrot
+      - /Users/leto/src/parrot/parrot-1.2.0/parrot
+      - /Users/leto/src/parrot/parrot-1.3.0/parrot
+      - /Users/leto/src/parrot/parrot-1.4.0/parrot
+      - /Users/leto/src/parrot/parrot-1.5.0/parrot
+      - /Users/leto/src/parrot/parrot-1.6.0/parrot
+      - /Users/leto/src/parrot/parrot-1.7.0/parrot
+      - /Users/leto/src/parrot/parrot-1.8.0/parrot
+      - /Users/leto/svn/parrot/parrot
