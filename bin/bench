@@ -89,7 +89,7 @@ $requested->{interp} = {map{ $_ => [map{$_}
 my $runs = build_runs($requested);
 die "No Euler Problem for that language"  unless @$runs;
 
-my $order_numeric = { map{$_ => 1} qw{min avg max file} };
+my $order_numeric = { map { $_ => 1 } qw/min avg max file total/ };
 
 if (scalar(@$runs) 
     && defined $requested->{opt}->{order}
