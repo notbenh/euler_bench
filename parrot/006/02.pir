@@ -5,6 +5,9 @@
     sum       = new 'Integer'
     squaresum = new 'Integer'
     $P1       = new 'Integer'
+    $P2       = new 'Integer'
+    $P3       = new 'Integer'
+    $P4       = new 'Integer'
     sum       = 0
     squaresum = 0
     $P1       = 1
