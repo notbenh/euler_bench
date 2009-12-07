@@ -118,6 +118,19 @@ sub report {
       } @$runs;
 }
 
+sub leto {
+   die "No Euler Problem for that language" unless @$runs;
+   my $root_fmt = sprintf q{ %%-%ds %%-%ds},
+                          max( map{length} map{$_->{language}}    @$runs ),
+                          max( map{length} map{$_->{interpreter}} @$runs );
+   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
+
+   map{ my $row = $_;
+        printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
+               map{ $row->{$_} || '' } qw{language interpreter min max avg total};
+      } @$runs;
+}
+
 sub rawdata { D $runs };
 sub data {json(@_)}; #alias data -> json for now
 sub json {
