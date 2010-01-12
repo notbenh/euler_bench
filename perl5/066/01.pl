@@ -5,7 +5,10 @@ use Math::Pell;
 use List::AllUtils qw/all/;
 use Data::Dumper;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
 # Project Euler - problem 66
 #http://projecteuler.net/index.php?section=problems&id=66
 
