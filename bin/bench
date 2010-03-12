@@ -89,7 +89,7 @@ $requested->{interp} = {map{ $_ => [map{$_}
 my $runs = build_runs($requested);
 die "No Euler Problem for that language"  unless @$runs;
 
-my $order_numeric = { map { $_ => 1 } qw/min avg max file total/ };
+my $order_numeric = { map { $_ => 1 } qw/min avg max file total spread stddev/ };
 
 if (scalar(@$runs) 
     && defined $requested->{opt}->{order}
@@ -103,31 +103,32 @@ if (scalar(@$runs)
 #  Run the right function for the output
 #---------------------------------------------------------------------------
 main->$cmd(); #dispatch to the 'right' output
-sub report {
+sub leto {
    die "No Euler Problem for that language" unless @$runs;
-   my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds %%-%ds},
+   my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds},
                           max( map{length} map{$_->{language}}    @$runs ),
                           max( map{length} map{$_->{interpreter}} @$runs ),
-                          max( map{length} (defined $_->{problems})?map{$_->{problem}}@$runs:'---'),
-                          max( map{length} map{$_->{file}}        @$runs );
-   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
+                          max( map{length} (defined $_->{problems})?map{$_->{problem}}@$runs:'---');
+
+   printf qq{$root_fmt    min     max     avg   spread   stddev  total\n}, '', '', '', '';
 
    map{ my $row = $_;
-        printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
-               map{ $row->{$_} || '' } qw{language interpreter problem file min max avg total};
+        printf qq{$root_fmt  %02.4f  %02.4f  %02.4f    %02d%%    %02.04f %02.04f\n},
+               map{ $row->{$_} || '' } qw{language interpreter problem min max avg spread stddev total};
       } @$runs;
 }
 
-sub leto {
+sub report {
    die "No Euler Problem for that language" unless @$runs;
-   my $root_fmt = sprintf q{ %%-%ds %%-%ds},
+   my $root_fmt = sprintf q{ %%-%ds %%-%ds %%-%ds },
                           max( map{length} map{$_->{language}}    @$runs ),
-                          max( map{length} map{$_->{interpreter}} @$runs );
-   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', ''; 
+                          max( map{length} map{$_->{interpreter}} @$runs ),
+                          max( map{length} map{$_->{file}}        @$runs );
+   printf qq{$root_fmt    min     max     avg    total\n}, '', '', '', '';
 
    map{ my $row = $_;
         printf qq{$root_fmt  %02.4f  %02.4f  %02.4f  %02.4f\n},
-               map{ $row->{$_} || '' } qw{language interpreter min max avg total};
+               map{ $row->{$_} || '' } qw{language interpreter file min max avg total};
       } @$runs;
 }
 

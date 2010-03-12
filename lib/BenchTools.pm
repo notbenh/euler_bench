@@ -7,9 +7,9 @@ use File::Basename;
 use File::Find;
 use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
-use List::Util qw{min max};
+use List::Util qw{min max sum};
 use YAML qw{LoadFile};
-use Benchmark::Stopwatch::Pause; 
+use Benchmark::Stopwatch::Pause;
 
 use Exporter qw{import};
 use Memoize;
@@ -151,15 +151,23 @@ sub run_command {
    $sw->stop;
 
    my $data = $sw->as_unpaused_data;
+
    shift @{$data->{laps}}; # no point in keeping _start_
-   my @times = map{$_->{elapsed_time}} @{$data->{laps}};
-   return { max   => max(@times),
-            min   => min(@times),
-            times => \@times,
-            total => $data->{total_elapsed_time},
-            avg   => (scalar(@times)) ? $data->{total_elapsed_time}/scalar(@times)
-                                      : 0,
-          };
+
+   my @times      = map{$_->{elapsed_time}} @{$data->{laps}};
+   my ($min,$max) = (min(@times),max(@times));
+   my $avg        = @times ? $data->{total_elapsed_time} / @times
+                           : 0;
+
+   return {
+        times   => \@times,
+        avg     => $avg,
+        min     => $min,
+        max     => $max,
+        spread  => 100*($max - $min)/$max,
+        stddev  => sqrt( (1/@times)*sum( map { ($_ - $avg)**2 } @times ) ),
+        total   => $data->{total_elapsed_time},
+    };
 
 }
 
