@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use 5.010;
 BEGIN {
    # LETO IS MY HERO
    use Cwd qw{abs_path};
