@@ -3,7 +3,7 @@ use v6;
 # Euler Project #17: http://projecteuler.net/index.php?section=problems&id=17
 # If the numbers 1 to 5 are written out in words: one, two, three, four, five,
 # then there are 3 + 3 + 5 + 4 + 4 = 19 letters used in total.
-# 
+#
 # If all the numbers from 1 to 1000 (one thousand) inclusive were written out in
 # words, how many letters would be used?
 #
@@ -65,7 +65,7 @@ sub NumberName(%number_names, $number)
         $name ~= %number_names{$biggest};
         $n -= $biggest;
     }
-    return $name;   
+    return $name;
 }
 
 my $letter = 0;

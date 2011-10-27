@@ -26,9 +26,9 @@ sub FindPotential(@seeds, $n)
 
 # Okay: we know that ConcatenatedProduct(9, 5) is a solution, 918273645. We're
 # looking for the max solution, and the beginning of each answer is our seed
-# number. Therefore, seed numbers must have a first digit of 9 to be worth 
-# considering.  We can rule out 2 or 3 digit seeds, because any multiplier 
-# greater than 1 will give a 3 or 4 digit result (respectively), and there's 
+# number. Therefore, seed numbers must have a first digit of 9 to be worth
+# considering.  We can rule out 2 or 3 digit seeds, because any multiplier
+# greater than 1 will give a 3 or 4 digit result (respectively), and there's
 # no integer solution N for 2+3N = 9 or 3+4N = 9.
 
 my @candidates;

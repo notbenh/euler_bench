@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 use strict;
 use warnings;
 use Memoize;
@@ -22,7 +22,7 @@ sub fib {
 my $i = 2; # we really could start anywhere but we know that 1 = 1 and it's not even
 my $sum = 0;
 while ((my $f = fib($i++)) < 4000000) {
-   $sum += $f unless $f %2; 
+   $sum += $f unless $f %2;
 }
 print $sum;
 

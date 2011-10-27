@@ -4,7 +4,7 @@ import scala.Math._
 def divisors(x: Int): Seq[Int] = {
   // start at sqrt of x, since that's the largest possible divisor
   val r = round(floor(sqrt(x))).toInt to 1 by -1
-  // identify divisors 
+  // identify divisors
   r.filter(x % _ == 0)
 }
 

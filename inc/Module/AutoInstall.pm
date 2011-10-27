@@ -22,7 +22,7 @@ my ( $Config,  $CheckOnly, $SkipInstall,   $AcceptDefault, $TestOnly );
 my ( $PostambleActions, $PostambleUsed );
 
 # See if it's a testing or non-interactive session
-_accept_default( $ENV{AUTOMATED_TESTING} or ! -t STDIN ); 
+_accept_default( $ENV{AUTOMATED_TESTING} or ! -t STDIN );
 _init();
 
 sub _accept_default {
@@ -363,7 +363,7 @@ sub _install_cpanplus {
     $conf->set_conf( makeflags => $makeflags );
     $conf->set_conf( prereqs   => 1 );
 
-    
+
 
     while ( my ( $key, $val ) = splice( @config, 0, 2 ) ) {
         $conf->set_conf( $key, $val );
@@ -653,7 +653,7 @@ sub _version_check {
     # check for version numbers that are not in decimal format
     if ( ref($cur) or ref($min) or $cur =~ /v|\..*\./ or $min =~ /v|\..*\./ ) {
         if ( ( $version::VERSION or defined( _load('version') )) and
-             version->can('new') 
+             version->can('new')
             ) {
 
             # use version.pm if it is installed.

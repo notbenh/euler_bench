@@ -9,7 +9,7 @@ use Data::Dumper;
 use Scalar::Util qw{looks_like_number};
 use List::Util qw{min max};
 use YAML qw{LoadFile};
-use Benchmark::Stopwatch::Pause; 
+use Benchmark::Stopwatch::Pause;
 
 use Exporter qw{import};
 use Memoize;
@@ -29,10 +29,10 @@ our @EXPORT = qw{
    run_command
 };
 
-sub D (@){print Dumper(@_)}; #so I'm lazy 
+sub D (@){print Dumper(@_)}; #so I'm lazy
 
 memoize('root_dir');
-sub root_dir { 
+sub root_dir {
    my $root_dir = [fileparse(abs_path(__FILE__))]->[1];
    my $base_dir = base_dir();
    $root_dir =~ s/(.*)$base_dir.?/$1/; # cd ..
@@ -57,15 +57,15 @@ memoize('solutions');
 sub solutions {
    my $root_dir = root_dir();
    my $solutions = {};
-   find(sub{ my $p = $File::Find::name; 
-             $p =~ s/$root_dir//; 
+   find(sub{ my $p = $File::Find::name;
+             $p =~ s/$root_dir//;
              my ($lang,$prob,$solution) = split /[\/]/, $p;
              $solutions->{$lang}->{$prob}->{$solution} = $File::Find::name
-               if $lang !~ m/^(?:bin|inc|[.]git)/ 
+               if $lang !~ m/^(?:bin|inc|[.]git)/
                && defined $lang        # language should be in a useful format
                && length $lang
                && defined $solution    # we should have a solution
-               && length $solution     
+               && length $solution
                && $solution !~ m/^[.]/ # hide any 'hidden' file
                ;
            }, $root_dir);
@@ -85,18 +85,18 @@ sub languages_hash { return {map{$_=>1} languages } }
 memoize('build_runs');
 sub build_runs {
    my $requested = shift;
-   [ map{ my $lang=$_; 
+   [ map{ my $lang=$_;
           my $problem_set =  config()->{language}->{$lang}->{problem_set} || $lang;
         map { my $interp = $_;
-              
+
               system(config()->{language}->{$lang}->{pre_run})
                  if defined config()->{language}->{$lang}->{pre_run};
-             
+
               my @benchee =
               map { { language     => $lang,
                       interpreter  => $interp,
                       file         => $_,
-                      %{ run_command( join(' ', $interp, $_, 
+                      %{ run_command( join(' ', $interp, $_,
                                            (config()->{hide_cmd_output}) ? '&> /dev/null' : ''
                                           ),
                                       $requested->{opt}->{count}
@@ -104,7 +104,7 @@ sub build_runs {
                        },
                     }
                   } @{ $requested->{benchee}};
-              
+
               my @probs =
               map{ my ($prob,@imp) = split /[:,]/, $_;
                    return 'xxx' unless defined $prob;
@@ -131,7 +131,7 @@ sub build_runs {
                   if defined config()->{language}->{$lang}->{post_run};
 
                grep{defined} @benchee, @probs;
-             
+
             } @{ $requested->{interp}->{$lang} }    #2 for every interep for that language in the config
         } @{$requested->{lang}}                            #1 for every language requested
 

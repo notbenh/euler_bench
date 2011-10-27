@@ -3,7 +3,7 @@ Introduction
   To allow compiled lanuages to be run, we have a two pass compile
   and run. The first pass takes a configurable script name, exec's
   that script passing the current file. The script will then
-  output another command to be run. It's this command that is 
+  output another command to be run. It's this command that is
   acutally timed.
 
   All this is done in a jail, which is deleted after each run. No
