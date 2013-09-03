@@ -25,17 +25,17 @@ class PrimeIter {
         # uncomment & rename method for easy conversion to normal sub :)
         #my $n = @_.shift;
         my $n = $!cur;
-        
+
         return 0 if $n % 2 == 0;
         return 1 if $n < 4;
-        
+
         my $x = 3;
         while ( $x <= sqrt $n ) {
             return 0 unless $n % $x;
             $x += 2;
         }
         return 1;
-    }    
+    }
 }
 
 my $to_factor = 600851475143;

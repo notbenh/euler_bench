@@ -64,7 +64,7 @@ sub clean_files {
 	my $self  = shift;
 	my $clean = $self->makemaker_args->{clean} ||= {};
 	  %$clean = (
-		%$clean, 
+		%$clean,
 		FILES => join ' ', grep { length $_ } ($clean->{FILES} || (), @_),
 	);
 }
@@ -73,7 +73,7 @@ sub realclean_files {
 	my $self      = shift;
 	my $realclean = $self->makemaker_args->{realclean} ||= {};
 	  %$realclean = (
-		%$realclean, 
+		%$realclean,
 		FILES => join ' ', grep { length $_ } ($realclean->{FILES} || (), @_),
 	);
 }
@@ -124,7 +124,7 @@ sub write {
 
 	$self->configure_requires( 'ExtUtils::MakeMaker' => $ExtUtils::MakeMaker::VERSION =~ /^(\d+\.\d+)/ );
 
-	# Generate the 
+	# Generate the
 	my $args = $self->makemaker_args;
 	$args->{DISTNAME} = $self->name;
 	$args->{NAME}     = $self->module_name || $self->name;
@@ -194,7 +194,7 @@ sub fix_up_makefile {
 	my $top_class     = ref($self->_top) || '';
 	my $top_version   = $self->_top->VERSION || '';
 
-	my $preamble = $self->preamble 
+	my $preamble = $self->preamble
 		? "# Preamble by $top_class $top_version\n"
 			. $self->preamble
 		: '';

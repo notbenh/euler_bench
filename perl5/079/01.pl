@@ -8,7 +8,7 @@ use strict; use warnings;
 #
 #The text file, keylog.txt, contains fifty successful login attempts.
 #
-#Given that the three characters are always asked for in order, analyse the file so as to determine the secret passcode of unknown length. 
+#Given that the three characters are always asked for in order, analyse the file so as to determine the secret passcode of unknown length.
 
 
 
@@ -44,7 +44,7 @@ foreach my $entry ( @entries ){
     $passcode =~ s/$third(.*)$second/$second$1$third/;
 
     #print "entry: $entry, passcode: $passcode\n";
-    
+
     #remove duplicates:
     my %count;
     $passcode = join('', map { $count{ $_ }++ ? '' : $_ } split //, $passcode );

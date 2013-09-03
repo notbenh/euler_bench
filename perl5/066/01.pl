@@ -19,7 +19,7 @@ sub squarefree { all { $_[0] % $_ != 0 } @squares; }
 
 my $maxD;
 my $maxX=-1;
-for (2..1000) { 
+for (2..1000) {
     my $D = $_;
     next unless squarefree($D);
     my @sol = Math::Pell->new({D=>$D})->find_minimal_sol;

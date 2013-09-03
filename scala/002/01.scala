@@ -1,9 +1,9 @@
 // a tail recursive fib implementation
 // http://en.literateprograms.org/Fibonacci_numbers_%28Scala%29
-def fib(n: Int): Long = fib_tr(n, 1, 0) 
+def fib(n: Int): Long = fib_tr(n, 1, 0)
 
 def fib_tr(n: Int, b: Long, a: Long): Long = n match {
-    case 0 => a 
+    case 0 => a
     case _ => fib_tr(n - 1, a + b, b)
 }
 

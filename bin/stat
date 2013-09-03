@@ -12,7 +12,7 @@ BEGIN {
 
 use List::Util qw{min max};
 use Scalar::Util qw{looks_like_number};
-use BenchTools; 
+use BenchTools;
 
 # what are we to be doing (overview | report)
 my $cmd = (defined $ARGV[0] && main->can($ARGV[0])) ? shift @ARGV : 'overview' ;
@@ -23,8 +23,8 @@ sub overview {
    my $fmt = join ' ', '%8s', map{sprintf q{%%%ds}, length($_)} languages;
    $fmt.="\n";
 printf $fmt, ' ', languages;
-printf $fmt, '+1 solve', map{ my $L = $_; 
-                              scalar( grep{$_>1} map{scalar(keys %$_) } values %{ solutions->{$L} } )  
+printf $fmt, '+1 solve', map{ my $L = $_;
+                              scalar( grep{$_>1} map{scalar(keys %$_) } values %{ solutions->{$L} } )
                             } languages;
 printf $fmt, 'done in',  map{sprintf q{%d/%d}, scalar( keys %{ solutions->{$_}}), $total_solutions } languages;
 }
@@ -34,7 +34,7 @@ sub report {
    $fmt.="\n";
    printf $fmt, ' ', languages;
    for my $prob ( sort keys %{ problems_hash() } ) {
-      printf $fmt, $prob, map{($_ eq '0')? '-' : $_ } 
+      printf $fmt, $prob, map{($_ eq '0')? '-' : $_ }
                           map{ scalar( keys %{ solutions->{$_}->{$prob} })
                              } languages;
    }
