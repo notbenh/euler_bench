@@ -13,13 +13,9 @@ ensure that you have the necessary dependencies installed.
 
 cd into the git checkout
 
-run 'perl Makefile.PL'.
-  You will want to answer 'yes' to installing dependencies if you want
-  the included comparison scripts to work.
-
-run 'make installdeps'
-  This should use CPANPLUS or CPAN to install the necessary
-  prerequisite modules for running the comparison scripts.
+    cd euler_bench
+    perl Makefile.PL # answer yes to installing deps if you want comparison scripts to work
+    make installdeps
 
 Or if you have cpanminus (you should), then just type:
 
@@ -30,5 +26,5 @@ Or if you have cpanminus (you should), then just type:
 
 Files in each directory are named according to:
 
-<language>/<3-digit project euler number>/<2-digit implementation number>.ext
+    <language>/<3-digit project euler number>/<2-digit implementation number>.ext
 
